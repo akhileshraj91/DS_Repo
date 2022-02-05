@@ -30,24 +30,27 @@ def main ():
 
 	print("Activate network")
 	net.start()
-	net.startTerms()
+	# net.startTerms()
 
 	print("Network Activated")
 
 
-	dumpNodeConnections(net.hosts)
+	# dumpNodeConnections(net.hosts)
 
-	h0.sendCmd('python pub.py')
-	
-	h1.sendCmd('python sub.py')
-
+	h0.cmd('python pub.py &> publisher_details.out &')
+	h1.cmd('python sub.py 10.0.0.1 &> subscriber_details.out &')
+	# h = net.get('h0')
+	# result_h1 = h1.waitOutput()
+	# result_h0 = h1.waitOutput()
+	# result0 = h0.cmd('ifconfig')
+	# result1 = h1.cmd('ifconfig')
+	# print(result0,result1,result_h1)
 
 
 	print("Exection sent to background and now awaiting the results from the publisher")
 
-	# results = h0.waitOutput()
 
-	print(net.hosts)
+	# print(net.hosts)
 
 	# CLI(net)
 	# net.pingAll()

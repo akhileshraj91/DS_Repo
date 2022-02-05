@@ -1,2 +1,6 @@
-sudo mn
-h1 echo hello
+h1 python registry_server.py &
+h2 python temp_client.py 10.0.0.1 &
+h3 python hum_client.py 10.0.0.1 &
+h4 python temp_req.py 10.0.0.1 &
+h5 python hum_req.py 10.0.0.1 &
+h6 python broker.py &
