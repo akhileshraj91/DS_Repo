@@ -1,22 +1,24 @@
-import os              # OS level utilities
-import sys             # system level utilities
-import random          # random number generator
-
-from time import time
-
-from mininet.net import Mininet
-from mininet.topo import LinearTopo
-from mininet.util import dumpNodeConnections
-from mininet.net import CLI
-from mininet.term import makeTerm
-from mininet.cli import CLI
-from mininet.net import Mininet
-from mininet.node import RemoteController
-from mininet.term import makeTerm
+import os
+import subprocess
 
 
-	
+# result = os.system("ip -4 addr show h1-eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'")
+# result = os.system("ip -4 addr show enp4s0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'")
+#
+#
+# print(result)
 
 
-my_ip = h1.cmd('python pub.py &> publisher_details.out &')
-print(my_ip)
+# output = subprocess.run(["ls", "-l", "/dev/null"], capture_output=True)
+# output = subprocess.run(["ls", "-l", "/dev/null"], capture_output=True)
+
+# out_2 = subprocess.run(["ip -4 addr show enp4s0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'"], capture_output=True)
+out_1 = subprocess.check_output("ifconfig", shell=True)
+out_string = out_1.decode()
+words_actual = out_string.split()
+# print(words_actual)
+res = words_actual.index("inet")
+print(words_actual[res+1])
+# out_2 = subprocess.check_output("ip -4 addr show h1-eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'", shell=True)
+# print(out_2)
+# print(out_2.decode())

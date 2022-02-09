@@ -1,7 +1,16 @@
 import sys
 import zmq
 from random import randrange
+import subprocess
 
+#find ip
+
+out_terminal = subprocess.check_output("ifconfig", shell=True)
+out_string = out_terminal.decode()
+words_actual = out_string.split()
+res = words_actual.index("inet")
+IP = words_actual[res+1]
+print(IP)
 
 print("Current libzmq version is %s" % zmq.zmq_version())
 print("Current  pyzmq version is %s" % zmq.__version__)
@@ -15,14 +24,13 @@ srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
 socket.connect (connect_str)
 PUB_name = "temperature"
-IP = "10.0.0.2" 
+# IP = "10.0.0.2" 
 while True:
     zipcode = randrange(1, 100000)
 
     temperature = randrange(-80, 135)
     string_send = str(PUB_name + " " + IP + " " + "%i %i" % (zipcode, temperature))
 
-    # socket.send(b"%i %i %i %i" % (zipcode, temperature, PUB_name, PUB_name, ))
     socket.send(string_send.encode())
 
     message = socket.recv().decode()
@@ -32,9 +40,8 @@ while True:
 
 
 
-# context = zmq.Context()
-socket = context.socket(zmq.PUB)
-socket.bind("tcp://*:5556")
+soc = context.socket(zmq.PUB)
+soc.bind("tcp://*:5556")
 PUB_name = "temperature"
 while True:
     zipcode = randrange(1, 100000)
@@ -42,4 +49,4 @@ while True:
     temperature = randrange(-80, 135)
     string_send = str(PUB_name + " " + IP + " " + "%i %i" % (zipcode, temperature))
 
-    socket.send(string_send.encode())
+    soc.send(string_send.encode())

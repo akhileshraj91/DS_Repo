@@ -3,6 +3,17 @@ import zmq
 from random import randrange
 import time
 
+import subprocess
+
+#find ip
+
+out_terminal = subprocess.check_output("ifconfig", shell=True)
+out_string = out_terminal.decode()
+words_actual = out_string.split()
+res = words_actual.index("inet")
+IP = words_actual[res+1]
+print(IP)
+
 print("Current libzmq version is %s" % zmq.zmq_version())
 print("Current  pyzmq version is %s" % zmq.__version__)
 
@@ -21,7 +32,7 @@ srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
 socket.connect (connect_str)
 SUB_name = "sub_temperature"
-IP = "10.0.0.4"
+# IP = "10.0.0.4"
 
 while True:
     string_send = str(SUB_name + " " + IP)

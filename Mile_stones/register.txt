@@ -1,4 +1,4 @@
-temperature 10.0.0.2 31489 63
+temperature 10.0.0.2 1594 134
 sub_humidity 10.0.0.5
-humidity 10.0.0.3 72997 35
+humidity 10.0.0.3 69874 47
 sub_temperature 10.0.0.4
