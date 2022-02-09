@@ -8,7 +8,6 @@ print("Current  pyzmq version is %s" % zmq.__version__)
 
 context = zmq.Context()
 
-print ("Connecting to hello world server ...")
 socket = context.socket(zmq.REQ)
 
 
@@ -18,7 +17,7 @@ print(con_str)
 soc.connect(con_str)
 
 
-srv_addr = sys.argv[1] if len(sys.argv) > 1 else "localhost"
+srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
 socket.connect (connect_str)
 SUB_name = "sub_temperature"
