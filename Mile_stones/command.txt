@@ -4,3 +4,11 @@ h3 python hum_client.py &
 h4 python temp_req.py &
 h5 python hum_req.py &
 h6 python broker.py &
+h7 python temp_req.py &
+h8 python hum_req.py &
+h9 python temp_req.py &
+h10 python hum_req.py &
+h11 python temp_req.py &
+h12 python hum_req.py &
+h13 python temp_client.py &
+h14 python hum_client.py &
