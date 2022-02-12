@@ -6,16 +6,16 @@ import get_ip_addr as ipman
 IP = ipman.get_default_addr()
 
 
+Direct = 1
 
 context = zmq.Context()
 
 socket = context.socket(zmq.REQ)
 
 
-soc = context.socket (zmq.SUB)
+soc1 = context.socket (zmq.SUB)
 con_str = "tcp://" + "10.0.0.2" + ":5557"
-print(con_str)
-soc.connect(con_str)
+soc1.connect(con_str)
 
 
 srv_addr = "10.0.0.1"
@@ -41,11 +41,30 @@ while True:
 
 needed = str(zipcode)
 
-while True:
-    soc.setsockopt_string(zmq.SUBSCRIBE, needed)
-    data = soc.recv_string()
+if Direct:
+    soc1.setsockopt_string(zmq.SUBSCRIBE, needed)
+    data = soc1.recv_string()
     print(data)
+    zipcode, source_ip = data.split()
     # time.sleep(1)
-    with open('humidity.txt', 'a') as f:
-        f.write(data+"\n")
-        time.sleep(1)
+    while True:
+        soc2 = context.socket (zmq.SUB)
+        con_str = "tcp://" + source_ip + ":5556"
+        soc2.connect(con_str)
+        soc2.setsockopt_string(zmq.SUBSCRIBE, needed)
+        data = soc2.recv_string()
+        print(data)
+        with open('humidity.txt', 'a') as f:
+            f.write(data+"\n")
+            time.sleep(1)
+
+else:
+
+    while True:
+        soc1.setsockopt_string(zmq.SUBSCRIBE, needed)
+        data = soc1.recv_string()
+        print(data)
+        # time.sleep(1)
+        with open('humidity.txt', 'a') as f:
+            f.write(data+"\n")
+            time.sleep(1)

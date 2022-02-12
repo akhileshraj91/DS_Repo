@@ -79,7 +79,7 @@ while True:
                 with open('register.txt', 'a') as f:
                     f.write(message.decode()+"\n")
         elif words[1] == "humidity":
-            if words[-1] not in humd_pub.keys():
+            if words[-1] not in humd_sub.keys():
                 humd_pub[words[-1]] = words[-2]
                 print("humidity dictionary is: " , humd_pub)
                 with open('register.txt', 'a') as f:
