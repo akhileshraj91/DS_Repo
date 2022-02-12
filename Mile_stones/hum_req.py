@@ -6,8 +6,6 @@ import get_ip_addr as ipman
 IP = ipman.get_default_addr()
 
 
-print("Current libzmq version is %s" % zmq.zmq_version())
-print("Current  pyzmq version is %s" % zmq.__version__)
 
 context = zmq.Context()
 
@@ -15,7 +13,7 @@ socket = context.socket(zmq.REQ)
 
 
 soc = context.socket (zmq.SUB)
-con_str = "tcp://" + "10.0.0.6" + ":5557"
+con_str = "tcp://" + "10.0.0.2" + ":5557"
 print(con_str)
 soc.connect(con_str)
 
@@ -23,13 +21,17 @@ soc.connect(con_str)
 srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
 socket.connect (connect_str)
-SUB_name = "sub_humidity"
-# IP = "10.0.0.5"
+kind = "SUB"
+info_needed = "humidity"
+zipcode = 65401
 
 while True:
-    string_send = str(SUB_name + " " + IP)
+    string_send = str(kind + " " + info_needed + " " + IP + " " + "%i" % (zipcode))
 
     socket.send(string_send.encode())
+
+    print("Attempting to register the subscriber")
+
 
     message = socket.recv().decode()
     print(message)
@@ -37,7 +39,7 @@ while True:
         break
 
 
-needed = "10.0.0.3"
+needed = str(zipcode)
 
 while True:
     soc.setsockopt_string(zmq.SUBSCRIBE, needed)
