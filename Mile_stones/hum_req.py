@@ -6,7 +6,7 @@ import get_ip_addr as ipman
 IP = ipman.get_default_addr()
 
 
-Direct = 1
+Direct = 0
 
 context = zmq.Context()
 
