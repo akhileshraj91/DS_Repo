@@ -27,35 +27,6 @@ while True:
     print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
 
 
-
-
-    # if words[0].decode() == "temperature":
-    #     if words[1].decode() not in temp_pub.keys():
-    #         temp_pub[words[1].decode()] = words[1].decode()
-    #         print("temperature dictionary is: ", temp_pub)
-    #         with open('register.txt', 'a') as f:
-    #             f.write(message.decode()+"\n")
-    # elif words[0].decode() == "humidity":
-    #     if words[1].decode() not in humd_pub.keys():
-    #         humd_pub[words[1].decode()] = words[1].decode()
-    #         print("humidity dictionary is: " , humd_pub)
-    #         with open('register.txt', 'a') as f:
-    #             f.write(message.decode()+"\n")
-
-    
-    # elif words[0].decode() == "sub_temperature":
-    #     if words[1].decode() not in temp_sub.keys():
-    #         temp_sub[words[1].decode()] = words[1].decode()
-    #         print("sub temp dictionary is: " , temp_sub)
-    #         with open('register.txt', 'a') as f:
-    #             f.write(message.decode()+"\n")
-    # elif words[0].decode() == "sub_humidity":
-    #     if words[1].decode() not in humd_sub.keys():
-    #         humd_sub[words[1].decode()] = words[1].decode()
-    #         print("sub humidity dictionary is: " , humd_sub)
-    #         with open('register.txt', 'a') as f:
-    #             f.write(message.decode()+"\n")
-
     if words[0] == "PUB":
         if words[1] == "temperature":
             if words[-1] not in temp_pub.keys():
