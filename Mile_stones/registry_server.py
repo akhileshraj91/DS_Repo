@@ -2,10 +2,10 @@
 
 import time
 import zmq    
-import get_ip_addr as ipman
+import useful_fns
 import json
 
-IP = ipman.get_default_addr()
+IP = useful_fns.get_default_addr()
 
 print("Registry started running on the server address: ", IP)
 
@@ -19,6 +19,7 @@ humd_pub = {}
 
 temp_sub = {}
 humd_sub = {}
+broker_details = None
 
 while True:
 
@@ -26,7 +27,7 @@ while True:
 
     words = message.decode().split()
 
-    print(words)
+    # print(words)
 
     if words[0] == "PUB":
         print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
@@ -64,13 +65,27 @@ while True:
                     f.write(message.decode()+"\n")
                 socket_register.send(b"registered")
 
+
+    elif words[0] == "BROKER":
+        broker_details = words[1:]
+        print(broker_details)
+        socket_register.send(b"registered")
+        print("Broker successfully registered")            
+
+    
     elif words[0] == "QUERY":
         data = json.dumps({"tp":temp_pub, "ts":temp_sub, "hp":humd_pub, "hs":humd_sub})
-        print(type(data))
+        socket_register.send_json(data)
+        # print("disctionary sent")
+
+
+    elif words[0] == "BROKER_Q":
+        data = json.dumps(broker_details)
+        # print(data)
         socket_register.send_json(data)
 
 
 
 
-    print(words[0] + " succesfully registered")
+    # print(words[0] + " succesfully registered")
 

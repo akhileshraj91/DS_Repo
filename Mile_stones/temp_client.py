@@ -1,12 +1,11 @@
 import sys
 import zmq
 from random import randrange
-import get_ip_addr as ipman
+import useful_fns
+import time
 
+IP = useful_fns.get_default_addr()
 
-IP = ipman.get_default_addr()
-
-# zipcode = randrange(1, 100000)
 zipcode = 37209
 print("Starting the Temperature publisher for: ", zipcode)
 
@@ -21,7 +20,6 @@ socket.connect (connect_str)
 kind = "PUB"
 info = "temperature"
 while True:
-    # string_send = str(PUB_name + " " + IP + " " + "%i %i" % (zipcode, temperature))
     string_send = str(kind + " " + info + " " + IP + " " + "%i" % (zipcode))
     socket.send(string_send.encode())
     print("Attempting to register the device")
@@ -40,3 +38,4 @@ while True:
     data = temperature
     string_send = str("%i %i" % (zipcode, data))
     soc.send(string_send.encode())
+    time.sleep(1)

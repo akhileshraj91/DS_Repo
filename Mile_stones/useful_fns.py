@@ -13,6 +13,7 @@ def get_default_addr():
     return "127.0.0.1"
 
 
-# if __name__ == '__main__':
-#     IP = get_default_addr()
-#     print(IP)
+def get_key(val):
+    for key, value in my_dict.items():
+         if val == value:
+             return key
