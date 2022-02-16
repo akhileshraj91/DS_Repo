@@ -13,7 +13,6 @@ socket = context.socket(zmq.REQ)
 
 soc = context.socket (zmq.SUB)
 con_str = "tcp://" + "10.0.0.2" + ":5557"
-print(con_str)
 soc.connect(con_str)
 
 

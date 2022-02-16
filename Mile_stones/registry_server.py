@@ -3,15 +3,17 @@
 import time
 import zmq    
 import get_ip_addr as ipman
+import json
+
 IP = ipman.get_default_addr()
 
 print("Registry started running on the server address: ", IP)
 
 context = zmq.Context ()  
 
-socket = context.socket (zmq.REP)
+socket_register = context.socket (zmq.REP)
 
-socket.bind ("tcp://*:5555")
+socket_register.bind ("tcp://*:5555")
 temp_pub = {}
 humd_pub = {}
 
@@ -20,43 +22,55 @@ humd_sub = {}
 
 while True:
 
-    message = socket.recv()
+    message = socket_register.recv()
 
     words = message.decode().split()
 
-    print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
-
+    print(words)
 
     if words[0] == "PUB":
+        print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
+
         if words[1] == "temperature":
-            if words[-1] not in temp_pub.keys():
-                temp_pub[words[-1]] = words[-2]
+            if words[-2] not in temp_pub.keys():
+                temp_pub[words[-2]] = words[-1]
                 print("temperature dictionary is: ", temp_pub)
                 with open('register.txt', 'a') as f:
                     f.write(message.decode()+"\n")
+                socket_register.send(b"registered")
         elif words[1] == "humidity":
-            if words[-1] not in humd_pub.keys():
-                humd_pub[words[-1]] = words[-2]
+            if words[-2] not in humd_pub.keys():
+                humd_pub[words[-2]] = words[-1]
                 print("humidity dictionary is: " , humd_pub)
                 with open('register.txt', 'a') as f:
                     f.write(message.decode()+"\n")
-
+                socket_register.send(b"registered")    
     
     elif words[0] == "SUB":
+        print("Received request to register a %s requesting %s values from the zipcode %s"%(words[0],words[1],words[-1]))
+
         if words[1] == "temperature":
-            if words[-1] not in temp_sub.keys():
-                temp_pub[words[-1]] = words[-2]
+            if words[-2] not in temp_sub.keys():
+                temp_sub[words[-2]] = words[-1]
                 print("temperature dictionary is: ", temp_sub)
                 with open('register.txt', 'a') as f:
                     f.write(message.decode()+"\n")
+                socket_register.send(b"registered")
         elif words[1] == "humidity":
-            if words[-1] not in humd_sub.keys():
-                humd_pub[words[-1]] = words[-2]
+            if words[-2] not in humd_sub.keys():
+                humd_sub[words[-2]] = words[-1]
                 print("humidity dictionary is: " , humd_pub)
                 with open('register.txt', 'a') as f:
                     f.write(message.decode()+"\n")
+                socket_register.send(b"registered")
+
+    elif words[0] == "QUERY":
+        data = json.dumps({"tp":temp_pub, "ts":temp_sub, "hp":humd_pub, "hs":humd_sub})
+        print(type(data))
+        socket_register.send_json(data)
 
 
-    socket.send(b"registered")
+
+
     print(words[0] + " succesfully registered")
 
