@@ -67,11 +67,11 @@ else:
             socket_register.send(string_send.encode())
             json_data = socket_register.recv_json()
             broker_details = json.loads(json_data)
-            # print(broker_details)
-            broker_ip = broker_details[0]
-            broker_PORT = broker_details[1]
+            print(broker_details)
+            # broker_ip = broker_details[0]
+            # broker_PORT = broker_details[1]
             broker_flag = 1
-            connect_str = "tcp://" + broker_ip + ":5557"
+            connect_str = "tcp://" + broker_details
             socket_broker.connect(connect_str)
 
         socket_broker.setsockopt_string(zmq.SUBSCRIBE, needed)

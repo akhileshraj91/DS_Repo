@@ -18,7 +18,7 @@ connect_str = "tcp://" + srv_addr + ":5555"
 socket_register.connect (connect_str)
 kind = "BROKER"
 while True:
-    string_send = str(kind + " " + IP + " " + PORT)
+    string_send = str(kind + " " + IP + ":" + PORT)
 
     socket_register.send(string_send.encode())
     print("Attempting to register the ", kind)
@@ -70,7 +70,6 @@ if Direct:
 
 else:
     while True:
-        # print("executing_loop")
         try:
             string_send = str("QUERY")
             socket_register.send(string_send.encode())
@@ -81,7 +80,7 @@ else:
                 if k == "tp" or k == "hp":
                     for key in lookup[k].keys():
                         srv_addr = key
-                        connect_str = "tcp://" + srv_addr + ":5556"
+                        connect_str = "tcp://" + srv_addr
                         socket_list.connect(connect_str)
                         socket_list.setsockopt_string(zmq.SUBSCRIBE, lookup[k][key])
                         data = socket_list.recv_string()

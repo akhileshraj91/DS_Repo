@@ -20,6 +20,10 @@ humd_pub = {}
 temp_sub = {}
 humd_sub = {}
 broker_details = None
+args = useful_fns.parseCmdLineArgs()
+print(args.strategy)
+
+
 
 while True:
 
@@ -67,7 +71,7 @@ while True:
 
 
     elif words[0] == "BROKER":
-        broker_details = words[1:]
+        broker_details = words[1]
         print(broker_details)
         socket_register.send(b"registered")
         print("Broker successfully registered")            
