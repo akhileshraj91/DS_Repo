@@ -25,7 +25,8 @@ while True:
 
     message = socket_register.recv().decode()
     print(message)
-    if message == "registered":
+    cm = message.split()
+    if cm[0] == "registered":
         break
 
 socket_list = context.socket(zmq.SUB)
@@ -33,42 +34,9 @@ socket_list = context.socket(zmq.SUB)
 socket_broker = context.socket(zmq.PUB)
 socket_broker.bind("tcp://*:" + PORT)
 
-Direct = 0
-filename = 'register.txt'
+print(cm[1])
 
-
-
-
-
-
-if Direct:
-    while True:
-        try:
-            with open(filename) as f:
-                for line in f:
-                    words = line.split()
-                    if words[0] == "SUB":
-                        info_req = words[-1]
-                        sub_addr = words[-2]
-                        print(words)
-                        with open(filename) as f2:
-                            for l in f2:
-                                W = l.split()
-                                print(W)
-                                if W[0] == "PUB" and W[-1] == info_req:
-                                    string_send = str(W[-1] + " " + W[-2])
-                                    socket_broker.send(string_send.encode())
-                                    print("information sent: ", string_send)
-                                    time.sleep(1)
-                                    break
-        except KeyboardInterrupt:
-            break
-
-
-
-
-
-else:
+if cm[1] == "indirect":
     while True:
         try:
             string_send = str("QUERY")

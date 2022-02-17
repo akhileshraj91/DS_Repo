@@ -27,8 +27,9 @@ while True:
     print("Attempting to register the device")
 
     message = socket_register.recv().decode()
-    print(message)
-    if message == "registered":
+    cm = message.split()
+    if cm[0] == "registered":
+        print(cm[0])
         break
 
 socket_pub = context.socket(zmq.PUB)
@@ -39,3 +40,4 @@ while True:
     data = humidity
     string_send = str("%i %i" % (zipcode, data))
     socket_pub.send(string_send.encode())
+    time.sleep(1)

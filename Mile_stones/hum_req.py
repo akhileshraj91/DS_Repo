@@ -16,7 +16,7 @@ srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
 socket_register.connect (connect_str)
 
-socket_broker = context.socket (zmq.SUB)
+socket_list = context.socket (zmq.SUB)
 
 
 
@@ -33,32 +33,16 @@ while True:
 
 
     message = socket_register.recv().decode()
-    print(message)
-    if message == "registered":
+    cm = message.split()
+    if cm[0] == "registered":
+        print(cm[0])
         break
 
 
 needed = str(zipcode)
 broker_flag = 0
 
-if Direct:
-    soc1.setsockopt_string(zmq.SUBSCRIBE, needed)
-    data = soc1.recv_string()
-    print(data)
-    zipcode, source_ip = data.split()
-    # time.sleep(1)
-    while True:
-        soc2 = context.socket (zmq.SUB)
-        con_str = "tcp://" + source_ip + ":5556"
-        soc2.connect(con_str)
-        soc2.setsockopt_string(zmq.SUBSCRIBE, needed)
-        data = soc2.recv_string()
-        print(data)
-        with open('humidity.txt', 'a') as f:
-            f.write(data+"\n")
-            time.sleep(1)
-
-else:
+if cm[1] == "indirect":
 
     while True:
         # print("executing loop")
@@ -72,12 +56,37 @@ else:
             # broker_PORT = broker_details[1]
             broker_flag = 1
             connect_str = "tcp://" + broker_details
-            socket_broker.connect(connect_str)
+            socket_list.connect(connect_str)
 
-        socket_broker.setsockopt_string(zmq.SUBSCRIBE, needed)
-        data = socket_broker.recv_string()
+        socket_list.setsockopt_string(zmq.SUBSCRIBE, needed)
+        data = socket_list.recv_string()
         print(data)
         # time.sleep(1)
         with open('humidity.txt', 'a') as f:
             f.write(data+"\n")
-            time.sleep(1)
+        time.sleep(1)
+
+else:
+    while True:
+        string_send = str("QUERY")
+        socket_register.send(string_send.encode())
+        json_data = socket_register.recv_json()
+        lookup = json.loads(json_data)
+        for k in lookup.keys():
+            if k == "hp":
+                for key in lookup[k].keys():
+                    if lookup[k][key] == needed:
+                        srv_addr = key
+                        connect_str = "tcp://" + srv_addr
+                        socket_list.connect(connect_str)
+                        socket_list.setsockopt_string(zmq.SUBSCRIBE, lookup[k][key])
+                        data = socket_list.recv_string()
+                        data_1, data_2 = data.split()
+        socket_list.setsockopt_string(zmq.SUBSCRIBE, needed)
+        print("waiting for data")
+        data = socket_list.recv_string()
+        print(data)
+        # time.sleep(1)
+        with open('humidity.txt', 'a') as f:
+            f.write(data+"\n")
+        time.sleep(1)

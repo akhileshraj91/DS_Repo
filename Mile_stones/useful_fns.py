@@ -13,7 +13,7 @@ def get_default_addr():
     return "127.0.0.1"
 
 
-def get_key(val):
+def get_key(val,my_dict):
     for key, value in my_dict.items():
          if val == value:
              return key
