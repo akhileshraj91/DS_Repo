@@ -7,7 +7,8 @@ import useful_fns
 zipcode = 65401
 
 IP = useful_fns.get_default_addr()
-PORT = "5556"
+PORT = randrange(5000,9999)
+PORT = str(PORT)
 print("Starting the Humidity publisher for: ", zipcode)
 
 context = zmq.Context()

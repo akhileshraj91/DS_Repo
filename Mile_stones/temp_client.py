@@ -5,7 +5,9 @@ import useful_fns
 import time
 
 IP = useful_fns.get_default_addr()
-PORT = "5556"
+
+PORT = randrange(5000,9999)
+PORT = str(PORT)
 zipcode = 37209
 print("Starting the Temperature publisher for: ", zipcode)
 

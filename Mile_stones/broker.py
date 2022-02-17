@@ -5,9 +5,12 @@ import socket
 import time
 import json
 import useful_fns
+from random import randrange
+
 
 IP = useful_fns.get_default_addr()
-PORT = "5557"
+PORT = randrange(5000,9999)
+PORT = str(PORT)
 
 context = zmq.Context()
 
@@ -43,6 +46,7 @@ if cm[1] == "indirect":
             socket_register.send(string_send.encode())
             json_data = socket_register.recv_json()
             lookup = json.loads(json_data)
+            # print(lookup)
             
             for k in lookup.keys():
                 if k == "tp" or k == "hp":
@@ -54,14 +58,26 @@ if cm[1] == "indirect":
                         data = socket_list.recv_string()
                         data_1, data_2 = data.split()
                         # print(data)
-                        for L in lookup.keys():
-                            if L == "ts" or L == "hs":
-                                # print(lookup[k])
-                                for key in lookup[L].keys():
-                                    string_send = str(data_1 + " " + data_2 + " ")
-                                    socket_broker.send(string_send.encode())
-                                    # print(".........................",string_send)
-                                    time.sleep(1)
+                        print(k)
+                        # for L in lookup.keys():
+                        if k == "tp":
+                            # print(lookup[k])
+                            # print(data)
+                            for key in lookup["ts"].keys():
+                                print(data)
+                                string_send = str(data_1 + " " + data_2 + " ")
+                                socket_broker.send(string_send.encode())
+                                # print(".........................",string_send)
+                                time.sleep(1)
+                        elif k == "hp":
+                            # print(lookup[k])
+                            # print(data)
+                            for key in lookup["hs"].keys():
+                                print(data)
+                                string_send = str(data_1 + " " + data_2 + " ")
+                                socket_broker.send(string_send.encode())
+                                # print(".........................",string_send)
+                                time.sleep(1)
 
         except KeyboardInterrupt:
             print("key_pressed and therefore break the loop")
