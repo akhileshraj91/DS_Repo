@@ -14,14 +14,10 @@ context = zmq.Context ()
 socket_register = context.socket (zmq.REP)
 
 socket_register.bind ("tcp://*:5555")
-temp_pub = {}
-humd_pub = {}
+
 publishers = {}
 subscribers = {}
-
-temp_sub = {}
-humd_sub = {}
-broker_details = None
+broker_details = {}
 args = useful_fns.parseCmdLineArgs()
 strat = args.strategy
 
@@ -47,7 +43,7 @@ if strat == "direct":
             print("Subscriber %s successfully registered"%words[1])
             
         elif words[0] == "BROKER":
-            broker_details = words[1]
+            broker_details[words[1]] = "hit"
             message = "registered " + strat
             socket_register.send(message.encode())
             print("Broker successfully registered")            
@@ -62,7 +58,7 @@ if strat == "direct":
             data = json.dumps({"p":publishers, "s":subscribers})
             socket_register.send_json(data)
 
-else:
+elif strat == "indirect":
 
 
     while True:
@@ -75,62 +71,34 @@ else:
 
         if words[0] == "PUB":
             print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
-
-            if words[1] == "temperature":
-                if words[-2] not in temp_pub.keys():
-                    temp_pub[words[-2]] = words[-1]
-                    print("temperature dictionary is: ", temp_pub)
-                    with open('register.txt', 'a') as f:
-                        f.write(message.decode()+"\n")
-                    message = "registered " + strat
-                    socket_register.send(message.encode())
-            elif words[1] == "humidity":
-                if words[-2] not in humd_pub.keys():
-                    humd_pub[words[-2]] = words[-1]
-                    print("humidity dictionary is: " , humd_pub)
-                    with open('register.txt', 'a') as f:
-                        f.write(message.decode()+"\n")
-                    message = "registered " + strat
-                    socket_register.send(message.encode())   
-        
+            publishers[words[1]] = words[2]
+            message = "registered " + strat
+            socket_register.send(message.encode())
+            print("Publsiher %s successfully registered"%words[1])
+            
         elif words[0] == "SUB":
-            print("Received request to register a %s requesting %s values from the zipcode %s"%(words[0],words[1],words[-1]))
-
-            if words[1] == "temperature":
-                if words[-2] not in temp_sub.keys():
-                    temp_sub[words[-2]] = words[-1]
-                    print("temperature dictionary is: ", temp_sub)
-                    with open('register.txt', 'a') as f:
-                        f.write(message.decode()+"\n")
-                    message = "registered " + strat
-                    socket_register.send(message.encode())
-            elif words[1] == "humidity":
-                if words[-2] not in humd_sub.keys():
-                    humd_sub[words[-2]] = words[-1]
-                    print("humidity dictionary is: " , humd_pub)
-                    with open('register.txt', 'a') as f:
-                        f.write(message.decode()+"\n")
-                    message = "registered " + strat
-                    socket_register.send(message.encode())
-
-
+            subscribers[words[1]] = words[2]
+            message = "registered " + strat
+            socket_register.send(message.encode())
+            print("Subscriber %s successfully registered"%words[1])
+            
         elif words[0] == "BROKER":
-            broker_details = words[1]
-            print(broker_details)
-            print(strat)
+            broker_details[words[1]] = "hit"
             message = "registered " + strat
             socket_register.send(message.encode())
             print("Broker successfully registered")            
 
         
         elif words[0] == "QUERY":
-            data = json.dumps({"tp":temp_pub, "ts":temp_sub, "hp":humd_pub, "hs":humd_sub})
+            data = json.dumps({"p":publishers, "s":subscribers})
             socket_register.send_json(data)
-            # print("disctionary sent")
 
 
         elif words[0] == "BROKER_Q":
             data = json.dumps(broker_details)
-            # print(data)
+            print(data)
             socket_register.send_json(data)
+            print(broker_details)
 
+else:
+    print("wrong strategy")

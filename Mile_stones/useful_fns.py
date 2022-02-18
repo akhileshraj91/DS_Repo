@@ -15,13 +15,6 @@ def get_default_addr():
     return "127.0.0.1"
 
 
-def get_key(val,my_dict):
-    adds = []
-    for key, value in my_dict.items():
-         if val == value:
-             adds.append(key)
-    return adds
-
 
 class CS6381_Subscriber ():
 
@@ -36,32 +29,42 @@ class CS6381_Subscriber ():
         self.pressure_socket = []
         self.humidity_socket = []
         self.addresses = []
+        self.subscribers = []
 
-    def configure (self):
+    def configure (self, strat="direct"):
         self.context = zmq.Context()
 
         self.poller = zmq.Poller ()
 
+        if strat == "indirect broker":
+            self.zip_code = ""
+
         for i in range(len(self.addresses)):
             address = self.addresses[i]
+            print(address)
             connect_str = "tcp://" + address
+            # print(self.params)
+            print(connect_str)
 
             if "temp" in self.params:
                 self.temp_socket.append(self.context.socket (zmq.SUB))
                 self.temp_socket[i].connect (connect_str)
                 filter = "temp:" + " " + self.zip_code
+                print(filter)
                 self.temp_socket[i].setsockopt_string(zmq.SUBSCRIBE, filter)
                 self.poller.register (self.temp_socket[i], zmq.POLLIN)
             if "humidity" in self.params:
                 self.humidity_socket.append(self.context.socket (zmq.SUB))
                 self.humidity_socket[i].connect (connect_str)
                 filter = "humidity:" + " " + self.zip_code
+                print(filter)
                 self.humidity_socket[i].setsockopt_string(zmq.SUBSCRIBE, filter)
                 self.poller.register (self.humidity_socket[i], zmq.POLLIN)
             if "pressure" in self.params:
                 self.pressure_socket.append(self.context.socket (zmq.SUB))
                 self.pressure_socket[i].connect (connect_str)
                 filter = "pressure:" + " " + self.zip_code
+                print(filter)
                 self.pressure_socket[i].setsockopt_string(zmq.SUBSCRIBE, filter)
                 self.poller.register (self.pressure_socket[i], zmq.POLLIN)
 
@@ -83,11 +86,54 @@ class CS6381_Subscriber ():
                     string = self.pressure_socket[i].recv_string()
                     print ("Subscriber:recv_pressure, value = {}".format (string))
 
-    def get_key(self,my_dict):
-        for key, value in my_dict.items():
-             if value == self.zip_code:
-                 self.addresses.append(key)
-                 print(key)
+    def broker_loop (self, PORT):
+        self.socket_broker = self.context.socket(zmq.PUB)
+        self.socket_broker.bind("tcp://*:" + PORT)
+
+        while True:
+            print("executing events",self.poller.poll())
+            events = dict (self.poller.poll ())
+            print(events,self.params,self.temp_socket)
+
+            for i in range(len(self.addresses)):
+                if "temp" in self.params and self.temp_socket[i] in events:
+                    string = self.temp_socket[i].recv_string()
+                    print ("Subscriber:recv_temp, value = {}".format (string))
+                    self.socket_broker.send_string(string)
+                
+                if "humidity" in self.params and self.humidity_socket[i] in events:
+                    string = self.humidity_socket[i].recv_string()
+                    print ("Subscriber:recv_humidity, value = {}".format (string))
+                    self.socket_broker.send_string(string)
+
+                
+                if "pressure" in self.params and self.pressure_socket[i] in events:
+                    string = self.pressure_socket[i].recv_string()
+                    print ("Subscriber:recv_pressure, value = {}".format (string))
+                    self.socket_broker.send_string(string)
+
+
+
+
+    def get_pubs(self,my_dict,strat="direct"):
+        if strat == "indirect":
+            print(my_dict)
+            for key, value in my_dict.items():
+                self.addresses.append(key)
+        else:
+            for key, value in my_dict.items():
+                 if value == self.zip_code:
+                     self.addresses.append(key)
+
+
+    def get_subs(self,my_dict,strat="direct"):
+        if strat == "indirect":
+            self.subscribers = my_dict.keys()
+
+        else:
+            for key, value in my_dict.items():
+                 if value == self.zip_code:
+                     self.subscribers.append(key)
 
 
 def parseCmdLineArgs ():
