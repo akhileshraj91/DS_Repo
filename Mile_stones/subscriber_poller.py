@@ -20,9 +20,8 @@ srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
 socket_register.connect (connect_str)
 kind = "SUB"
-info = "temperature"
 while True:
-    string_send = str(kind + " " + info + " " + IP + ":" + PORT + " " + zip_code)
+    string_send = str(kind + " " + IP + ":" + PORT + " " + zip_code)
     socket_register.send(string_send.encode())
     print("Attempting to register the device")
 
@@ -33,22 +32,21 @@ while True:
         break
 
 
-string_send = str("QUERY_all")
+string_send = str("QUERY")
 socket_register.send(string_send.encode())
 json_data = socket_register.recv_json()
 lookup_dict = json.loads(json_data)
-print(lookup_dict['p'])
-required_addresses = useful_fns.get_key(zip_code, lookup_dict['p'])
-print(required_addresses)
     
 def main ():
-    parsed_args = useful_fns.parseCmdLineArgs ()
+    parsed_args = args
 
     subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
 
-    subscriber.configure (required_addresses)
+    subscriber.get_key(lookup_dict['p'])
 
-    subscriber.event_loop (required_addresses)
+    subscriber.configure ()
+
+    subscriber.event_loop ()
     
 #----------------------------------------------
 if __name__ == '__main__':
