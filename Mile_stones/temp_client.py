@@ -23,6 +23,7 @@ kind = "PUB"
 info = "temperature"
 while True:
     string_send = str(kind + " " + info + " " + IP + ":" + PORT + " " + "%i" % (zipcode))
+    print(string_send)
     socket_register.send(string_send.encode())
     print("Attempting to register the device")
 

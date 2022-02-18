@@ -16,6 +16,8 @@ socket_register = context.socket (zmq.REP)
 socket_register.bind ("tcp://*:5555")
 temp_pub = {}
 humd_pub = {}
+publishers = {}
+subscribers = {}
 
 temp_sub = {}
 humd_sub = {}
@@ -29,6 +31,7 @@ if strat == "indirect":
     while True:
 
         message = socket_register.recv()
+        print(message)
 
         words = message.decode().split()
 
@@ -36,7 +39,7 @@ if strat == "indirect":
 
         if words[0] == "PUB":
             print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
-
+            publishers[words[-2]] = words[-1] 
             if words[1] == "temperature":
                 if words[-2] not in temp_pub.keys():
                     temp_pub[words[-2]] = words[-1]
@@ -55,6 +58,7 @@ if strat == "indirect":
                     socket_register.send(message.encode())    
         
         elif words[0] == "SUB":
+            subscribers[words[-2]] = words[-1]
             print("Received request to register a %s requesting %s values from the zipcode %s"%(words[0],words[1],words[-1]))
 
             if words[1] == "temperature":
@@ -91,6 +95,10 @@ if strat == "indirect":
         elif words[0] == "BROKER_Q":
             data = json.dumps(broker_details)
             # print(data)
+            socket_register.send_json(data)
+
+        elif words[0] == "QUERY_all":
+            data = json.dumps({"p":publishers, "s":subscribers})
             socket_register.send_json(data)
 
 else:

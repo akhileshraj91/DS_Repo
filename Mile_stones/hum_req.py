@@ -71,7 +71,7 @@ else:
         string_send = str("QUERY")
         socket_register.send(string_send.encode())
         json_data = socket_register.recv_json()
-        lookup = json.loads(json_data)
+        lookup = json.loads(json_data)["p"]
         for k in lookup.keys():
             if k == "hp":
                 for key in lookup[k].keys():
