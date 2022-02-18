@@ -72,7 +72,6 @@ class CS6381_Subscriber ():
         while True:
 
             events = dict (self.poller.poll ())
-
             for i in range(len(self.addresses)):
                 if "temp" in self.params and self.temp_socket[i] in events:
                     string = self.temp_socket[i].recv_string()
@@ -91,10 +90,7 @@ class CS6381_Subscriber ():
         self.socket_broker.bind("tcp://*:" + PORT)
 
         while True:
-            print("executing events",self.poller.poll())
             events = dict (self.poller.poll ())
-            print(events,self.params,self.temp_socket)
-
             for i in range(len(self.addresses)):
                 if "temp" in self.params and self.temp_socket[i] in events:
                     string = self.temp_socket[i].recv_string()
@@ -117,7 +113,6 @@ class CS6381_Subscriber ():
 
     def get_pubs(self,my_dict,strat="direct"):
         if strat == "indirect":
-            print(my_dict)
             for key, value in my_dict.items():
                 self.addresses.append(key)
         else:
