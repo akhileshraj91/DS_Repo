@@ -7,6 +7,4 @@ h6 python -u broker.py &> ./logs/broker_logs.out &
 h11 python -u subscriber_poller.py -z 65401 -i temp &> ./logs/subscriber_65401_temp_logs.out &
 h12 python -u subscriber_poller.py &> ./logs/subscriber_37209_all_logs.out &
 h7 python -u subscriber_poller.py -z 90011 -i temp &> ./logs/subscriber_90011_temp_logs.out &
-h8 python -u subscriber_poller.py -z 90011 &> ./logs/subscriber_1_90011_all_logs.out &
-h9 python -u subscriber_poller.py -z 90011 &> ./logs/subscriber_2_90011_all_logs.out &
-h10 python -u subscriber_poller.py -z 10001 &> ./logs/subscriber_10001_all_logs.out &
+h8 python -u subscriber_poller.py -z 10001 &> ./logs/subscriber_10001_all_logs.out &
