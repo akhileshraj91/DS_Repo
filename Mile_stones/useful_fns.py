@@ -2,6 +2,8 @@ import netifaces
 import argparse
 import sys
 import zmq
+import csv
+import time
 
 def get_default_addr():
     for interface in netifaces.interfaces():
@@ -30,8 +32,11 @@ class CS6381_Subscriber ():
         self.humidity_socket = []
         self.addresses = []
         self.subscribers = []
+        self.name = None
 
     def configure (self, strat="direct"):
+        self.name = self.zip_code + strat
+
         self.context = zmq.Context()
 
         self.poller = zmq.Poller ()
@@ -70,25 +75,44 @@ class CS6381_Subscriber ():
 
     def event_loop (self):
         while True:
-
             events = dict (self.poller.poll ())
             for i in range(len(self.addresses)):
                 if "temp" in self.params and self.temp_socket[i] in events:
                     string = self.temp_socket[i].recv_string()
                     print ("Subscriber:recv_temp, value = {}".format (string))
+                    sent_time = string.split()[-1]
+                    recv_time = time.time()
+                    transmission_time = recv_time-float(sent_time)
+                    with open("./logs/%s_trans.csv"%(self.name),'a',newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerow([sent_time,recv_time,transmission_time])
+
+
                 
                 if "humidity" in self.params and self.humidity_socket[i] in events:
                     string = self.humidity_socket[i].recv_string()
                     print ("Subscriber:recv_humidity, value = {}".format (string))
+                    sent_time = string.split()[-1]
+                    recv_time = time.time()
+                    transmission_time = recv_time-float(sent_time)
+                    with open("./logs/%s_trans.csv"%(self.name),'a',newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerow([sent_time,recv_time,transmission_time])
+
                 
                 if "pressure" in self.params and self.pressure_socket[i] in events:
                     string = self.pressure_socket[i].recv_string()
                     print ("Subscriber:recv_pressure, value = {}".format (string))
+                    sent_time = string.split()[-1]
+                    recv_time = time.time()
+                    transmission_time = recv_time-float(sent_time)
+                    with open("./logs/%s_trans.csv"%(self.name),'a',newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerow([sent_time,recv_time,transmission_time])
 
     def broker_loop (self, PORT):
         self.socket_broker = self.context.socket(zmq.PUB)
         self.socket_broker.bind("tcp://*:" + PORT)
-
         while True:
             events = dict (self.poller.poll ())
             for i in range(len(self.addresses)):
@@ -96,7 +120,8 @@ class CS6381_Subscriber ():
                     string = self.temp_socket[i].recv_string()
                     print ("Subscriber:recv_temp, value = {}".format (string))
                     self.socket_broker.send_string(string)
-                
+
+
                 if "humidity" in self.params and self.humidity_socket[i] in events:
                     string = self.humidity_socket[i].recv_string()
                     print ("Subscriber:recv_humidity, value = {}".format (string))
@@ -107,7 +132,6 @@ class CS6381_Subscriber ():
                     string = self.pressure_socket[i].recv_string()
                     print ("Subscriber:recv_pressure, value = {}".format (string))
                     self.socket_broker.send_string(string)
-
 
 
 

@@ -47,17 +47,17 @@ while True:
     para = random.choice(params)
     if para == "temp":  # temp
         temp = randrange (-10, 101)
-        topic = "temp:" + " " + zip_code + " " + str (temp) 
+        topic = "temp:" + " " + zip_code + " " + str (temp)+ " " + str(time.time()) 
     elif para == "humidity": # humidity
         humidity = randrange (20, 101)
-        topic = "humidity:" + " " + zip_code + " " + str (humidity)
+        topic = "humidity:" + " " + zip_code + " " + str (humidity)+ " "+ str(time.time())
     elif para == "pressure": # pressure
         pressure = randrange (26, 34)
-        topic = "pressure:" + " " + zip_code + " " + str (pressure)
+        topic = "pressure:" + " " + zip_code + " " + str (pressure)+ " " + str(time.time())
     else:
         print ("bad category")
         continue
 
     print ("Sending: {}".format (topic))
     socket.send_string (topic)
-    time.sleep (0.1)  
+    time.sleep (0.5)  
