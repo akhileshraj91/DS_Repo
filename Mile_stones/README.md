@@ -27,6 +27,17 @@ Example:
 ```bash
 h1 python -u registry_server.py -s indirect &> ./logs/registry.logs.out &
 ```
+One can get necessary help by typing -h with any python code:
+```python
+python registry_server.py -h
+```
+Apparantly the following command parser arguments will help:
+
+```python
+"-s", "--strategy", default="direct", help="direct or indirect, default direct"
+"-i", "--info", default="temp,humidity,pressure", help="chooses the publishing/subscribing informations"
+"-z", "--zipcode", default="37209", help="Enter a 5 digit zipcode"
+```
 
 Alternatively you can run:
 ```bash
@@ -49,6 +60,13 @@ Only make sure that you execute the commands in the following order:
 - subscriber
 
 Atleast for this version this order is preferred. It is expected to change from the next version onwards.
+
+After Execution you can use the plotting.py to undestand the latency associated with the data transmission.
+
+```python
+python plotting.py
+```
+
 
 
 
