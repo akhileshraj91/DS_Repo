@@ -1,0 +1,7 @@
+h1 python kademlia_bootstrap.py -c
+h2 python kademlia_bootstrap.py -i 10.0.0.1
+h3 python kademlia_bootstrap.py -i 10.0.0.1
+h4 python kademlia_bootstrap.py -i 10.0.0.2
+h2 python -u publisher_poller.py &> ./logs/publisher_37209_pressure_logs.out &
+h6 python -u broker.py &> ./logs/broker_logs.out &
+h11 python -u subscriber_poller.py &> ./logs/subscriber_65401_temp_logs.out &
