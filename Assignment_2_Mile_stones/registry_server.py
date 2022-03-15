@@ -5,6 +5,11 @@ import json
 import asyncio
 import time
 
+# kad_client = useful_fns.KademliaClient(4321, [("10.0.0.1",4001), ("10.0.0.2",4001), ("10.0.0.2", 4002)])
+kad_client = useful_fns.KademliaClient(8468, [("10.0.0.1",8468), ("10.0.0.2",8468), ("10.0.0.2", 4002)])
+
+
+
 IP = useful_fns.get_default_addr()
 
 print("Registry started running on the server address: ", IP)
@@ -19,6 +24,7 @@ publishers = {}
 subscribers = {}
 broker_details = {}
 args = useful_fns.parseCmdLineArgs()
+
 strat = args.strategy
 
 print("going to execute the %s strategy"%strat)
@@ -28,24 +34,25 @@ if strat == "direct":
     while True:
         message = socket_register.recv()
         words = message.decode().split()
-        if words[0] == "DHT":
-            print("Received request to register a DHT server")
-            message = "registered " + strat
-            socket_register.send(message.encode())
-            time.sleep(1)
-            print(words)
-            asyncio.run(useful_fns.set_main(words[0], words[1:]))
-            print("Publsiher %s successfully registered" % words[1])
+        # if words[0] == "DHT":
+        #     print("Received request to register a DHT server")
+        #     message = "registered " + strat
+        #     socket_register.send(message.encode())
+        #     time.sleep(1)
+        #     print(words)
+        #     asyncio.run(useful_fns.set_main(words[0], words[1:]))
+        #     print("DHT_server %s successfully registered" % words[1])
 
-        elif words[0] == "PUB":
+        if words[0] == "PUB":
             print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
-            asyncio.run(useful_fns.set_main(words[0],words[1:]))
+            # kad_client.set(words[0],words[1:])
+            kad_client.set(words[2],words[1])
             message = "registered " + strat
             socket_register.send(message.encode())
             print("Publsiher %s successfully registered"%words[1])
             
         elif words[0] == "SUB":
-            asyncio.run(useful_fns.set_main(words[0],words[1:]))
+            kad_client.set(words[0],words[1])
             message = "registered " + strat
             socket_register.send(message.encode())
             print("Subscriber %s successfully registered"%words[1])
@@ -54,8 +61,7 @@ if strat == "direct":
             asyncio.run(useful_fns.set_main(words[0],words[1:]))
             message = "registered " + strat
             socket_register.send(message.encode())
-            print("Broker successfully registered")            
-
+            print("Broker successfully registered")
 
         elif words[0] == "BROKER_Q":
             broker_details = asyncio.run(useful_fns.get_main(words[0]))

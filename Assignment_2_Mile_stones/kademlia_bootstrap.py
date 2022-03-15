@@ -14,7 +14,7 @@ def register_DHT():
     kind = "DHT"
 
     while True:
-        string_send = str(kind + " " + IP + ":" + PORT)
+        string_send = str(kind + " " + IP + ":")
         socket_register.send(string_send.encode())
         print("Attempting to register the DHT server")
         message = socket_register.recv().decode()

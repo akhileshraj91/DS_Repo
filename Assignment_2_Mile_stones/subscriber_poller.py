@@ -35,7 +35,8 @@ def main ():
 
     if cm[1] == "direct":
 
-        string_send = str("QUERY")
+        string_send = str("QUERY" + " " + zip_code)
+        print(string_send)
         socket_register.send(string_send.encode())
         json_data = socket_register.recv_json()
         lookup_dict = json.loads(json_data)
