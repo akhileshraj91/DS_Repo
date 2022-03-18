@@ -15,7 +15,7 @@ PORT = str(PORT)
 
 context = zmq.Context()
 
-
+zip_code = "37209"
 socket_register = context.socket(zmq.REQ)
 srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
@@ -35,21 +35,24 @@ while True:
 
 if cm[1] == "indirect":
     while True:
-        string_send = str("QUERY")
+        string_send = str("QUERY"+ " " + zip_code)
         socket_register.send(string_send.encode())
         json_data = socket_register.recv_json()
         lookup_dict = json.loads(json_data)
         
-
+        print(lookup_dict)
         parsed_args = args
 
         subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
 
         print(lookup_dict)
+        if lookup_dict != None:
 
-        subscriber.get_pubs(lookup_dict['p'],"indirect")
+            subscriber.get_pubs(lookup_dict,"indirect")
 
-        subscriber.configure ("indirect broker")
+            subscriber.configure ("indirect broker")
 
-        subscriber.broker_loop (PORT)
+            subscriber.broker_loop (PORT)
+        else:
+            continue
     

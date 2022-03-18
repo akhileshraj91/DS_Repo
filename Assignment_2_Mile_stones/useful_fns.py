@@ -135,12 +135,18 @@ class CS6381_Subscriber():
 
     def get_pubs(self, my_dict, strat="direct"):
         if strat == "indirect":
-            for key, value in my_dict.items():
-                self.addresses.append(key)
+            for ele in my_dict:
+                self.addresses.append(ele)
+            # self.addresses.append(my_dict)
+            # for key, value in my_dict.items():
+            #     self.addresses.append(key)
         else:
-            for key, value in my_dict.items():
-                if value == self.zip_code:
-                    self.addresses.append(key)
+            for ele in my_dict:
+                self.addresses.append(ele)
+            # self.addresses.append(my_dict)
+            # for key, value in my_dict.items():
+            #     if value == self.zip_code:
+            #         self.addresses.append(key)
 
     def get_subs(self, my_dict, strat="direct"):
         if strat == "indirect":
@@ -170,47 +176,6 @@ def parseCmdLineArgs():
     args = parser.parse_args()
     return args
 
-
-async def set_main(key, value):
-    # first parse the arguments
-    print("Main: parse command line arguments")
-    args = parseCmdLineArgs()
-
-    # instantiate the DHT class
-    print("Main: Instantiate the Kademlia DHT object")
-    kdht = Kademlia_DHT()
-
-    # initialize the object
-    print("Main: Initialize the Kademlia DHT object")
-    if (not kdht.initialize(args)):
-        print("Main: Initialization of Kademlia DHT failed")
-        return
-
-    # now set the value
-    print("Main: Bootstrap and set key-val")
-    await kdht.set_value(args.key, args.value)
-
-
-async def get_main(key):
-    # first parse the arguments
-    print("Main: parse command line arguments")
-    args = parseCmdLineArgs()
-
-    # instantiate the DHT class
-    print("Main: Instantiate the Kademlia DHT object")
-    kdht = Kademlia_DHT()
-
-    # initialize the object
-    print("Main: Initialize the Kademlia DHT object")
-    if (not kdht.initialize(args)):
-        print("Main: Initialization of Kademlia DHT failed")
-        return
-
-    # now set the value
-    print("Main: Bootstrap and key value for key")
-    result = await kdht.get_value(args.key)
-
-    print("Main: returned result for key = {} is {}".format(args.key, result))
 
 
 
