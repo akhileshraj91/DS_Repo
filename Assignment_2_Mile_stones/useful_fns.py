@@ -53,64 +53,67 @@ class CS6381_Subscriber():
             address = self.addresses[i]
             print(address)
             connect_str = "tcp://" + address
+
             # print(self.params)
-            print(connect_str)
+            # print(connect_str)
 
             if "temp" in self.params:
                 self.temp_socket.append(self.context.socket(zmq.SUB))
                 self.temp_socket[i].connect(connect_str)
                 filter = "temp:" + " " + self.zip_code
-                print(filter)
+                # print(filter)
                 self.temp_socket[i].setsockopt_string(zmq.SUBSCRIBE, filter)
                 self.poller.register(self.temp_socket[i], zmq.POLLIN)
             if "humidity" in self.params:
                 self.humidity_socket.append(self.context.socket(zmq.SUB))
                 self.humidity_socket[i].connect(connect_str)
                 filter = "humidity:" + " " + self.zip_code
-                print(filter)
+                # print(filter)
                 self.humidity_socket[i].setsockopt_string(zmq.SUBSCRIBE, filter)
                 self.poller.register(self.humidity_socket[i], zmq.POLLIN)
             if "pressure" in self.params:
                 self.pressure_socket.append(self.context.socket(zmq.SUB))
                 self.pressure_socket[i].connect(connect_str)
                 filter = "pressure:" + " " + self.zip_code
-                print(filter)
+                # print(filter)
                 self.pressure_socket[i].setsockopt_string(zmq.SUBSCRIBE, filter)
                 self.poller.register(self.pressure_socket[i], zmq.POLLIN)
 
     def event_loop(self):
-        while True:
-            events = dict(self.poller.poll())
-            for i in range(len(self.addresses)):
-                if "temp" in self.params and self.temp_socket[i] in events:
-                    string = self.temp_socket[i].recv_string()
-                    print("Subscriber:recv_temp, value = {}".format(string))
-                    sent_time = string.split()[-1]
-                    recv_time = time.time()
-                    transmission_time = recv_time - float(sent_time)
-                    with open("./logs/%s_trans.csv" % (self.name), 'a', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerow([sent_time, recv_time, transmission_time])
+        # while True:
+        events = dict(self.poller.poll())
+        for i in range(len(self.addresses)):
+            print("event begin")
+            if "temp" in self.params and self.temp_socket[i] in events:
+                string = self.temp_socket[i].recv_string()
+                print("Subscriber:recv_temp, value = {}".format(string))
+                sent_time = string.split()[-1]
+                recv_time = time.time()
+                transmission_time = recv_time - float(sent_time)
+                with open("./logs/%s_trans.csv" % (self.name), 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([sent_time, recv_time, transmission_time])
 
-                if "humidity" in self.params and self.humidity_socket[i] in events:
-                    string = self.humidity_socket[i].recv_string()
-                    print("Subscriber:recv_humidity, value = {}".format(string))
-                    sent_time = string.split()[-1]
-                    recv_time = time.time()
-                    transmission_time = recv_time - float(sent_time)
-                    with open("./logs/%s_trans.csv" % (self.name), 'a', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerow([sent_time, recv_time, transmission_time])
+            if "humidity" in self.params and self.humidity_socket[i] in events:
+                string = self.humidity_socket[i].recv_string()
+                print("Subscriber:recv_humidity, value = {}".format(string))
+                sent_time = string.split()[-1]
+                recv_time = time.time()
+                transmission_time = recv_time - float(sent_time)
+                with open("./logs/%s_trans.csv" % (self.name), 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([sent_time, recv_time, transmission_time])
 
-                if "pressure" in self.params and self.pressure_socket[i] in events:
-                    string = self.pressure_socket[i].recv_string()
-                    print("Subscriber:recv_pressure, value = {}".format(string))
-                    sent_time = string.split()[-1]
-                    recv_time = time.time()
-                    transmission_time = recv_time - float(sent_time)
-                    with open("./logs/%s_trans.csv" % (self.name), 'a', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerow([sent_time, recv_time, transmission_time])
+            if "pressure" in self.params and self.pressure_socket[i] in events:
+                string = self.pressure_socket[i].recv_string()
+                print("Subscriber:recv_pressure, value = {}".format(string))
+                sent_time = string.split()[-1]
+                recv_time = time.time()
+                transmission_time = recv_time - float(sent_time)
+                with open("./logs/%s_trans.csv" % (self.name), 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([sent_time, recv_time, transmission_time])
+            print("completed one event")
 
     def broker_loop(self, PORT):
         self.socket_broker = self.context.socket(zmq.PUB)
@@ -173,6 +176,8 @@ def parseCmdLineArgs():
                         type=int, default=None)
     parser.add_argument("-k", "--key", type=str, default=None, help="Key to set value under")
     parser.add_argument("-v", "--value", type=str, default=None, help="value for the key to set under")
+    parser.add_argument("-t", "--duration", type=int, default=1000, help="duration of a publisher")
+
     args = parser.parse_args()
     return args
 

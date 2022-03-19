@@ -5,9 +5,6 @@ import json
 import asyncio
 import time
 
-# kad_client = useful_fns.KademliaClient(4321, [("10.0.0.1",4001), ("10.0.0.2",4001), ("10.0.0.2", 4002)])
-
-
 
 IP = useful_fns.get_default_addr()
 
@@ -34,7 +31,10 @@ print(args)
 if strat == "direct":
 
     while True:
+        print("executing loop")
+        # print("$$$$$$$$$ looping")
         message = socket_register.recv()
+        print(message)
         words = message.decode().split()
 
         if words[0] == "PUB":
@@ -65,14 +65,60 @@ if strat == "direct":
             socket_register.send(message.encode())
             print("Subscriber %s successfully registered"%words[1])
 
+
         elif words[0] == "QUERY":
             details = kad_client.get("PUB")
-            data = json.loads(details)[words[1]]
+            print(words[1], publishers.keys())
+            if words[1] in publishers.keys():
+                data = json.loads(details)[words[1]]
+            else:
+                data = None
             print(".........................................................",data)
             socket_register.send_json(json.dumps(data))
 
-        else:
-            continue
+        elif words[0] == "remove":
+            # if words[2] in publishers.keys():
+            #     publishers[words[2]].remove(words[1])
+            #     print("the publisher is removed")
+            #     print(publishers)
+            #     kad_client.set("PUB",json.dumps(publishers))
+            #     details = kad_client.get("PUB")
+            #     data = json.loads(details)[words[2]]
+            #     print("###",data)
+            #     # data = "empty"
+            #     socket_register.send(data.encode())
+            #     time.sleep(0.5)
+            #     print("********")
+            #     # continue
+
+            print("Received request to %s a publisher publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
+            if words[2] in publishers.keys():
+                publishers[words[2]].remove(words[1])
+                print("............................",publishers)
+
+            #     publishers[words[2]].append(words[1])
+            #     print("the repo was already present")
+            # else:
+            #     publishers[words[2]] = []
+            #     publishers[words[2]].append(words[1])
+            #     print("the repo was just created")
+
+            kad_client.set("PUB",json.dumps(publishers))
+            message = "removed " + strat
+            socket_register.send(message.encode())
+            print("Publsiher %s successfully removed"%words[1])
+
+            # details = kad_client.get("PUB")
+            # if words[1] in publishers.keys():
+            #     data = json.loads(details)[words[1]]
+            # else:
+            #     data = None
+            # print(data)
+            # socket_register.send_json(json.dumps(data))
+
+
+
+            # continue
 
 elif strat == "indirect":
 
@@ -114,7 +160,11 @@ elif strat == "indirect":
 
         elif words[0] == "QUERY":
             details = kad_client.get("PUB")
-            data = json.loads(details)[words[1]]
+            print(words[1], publishers.keys())
+            if words[1] in publishers.keys():
+                data = json.loads(details)[words[1]]
+            else:
+                data = None
             print(".........................................................",data)
             socket_register.send_json(json.dumps(data))
             

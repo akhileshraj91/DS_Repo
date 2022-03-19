@@ -6,6 +6,7 @@ from random import randrange
 import useful_fns
 import json
 import random
+import keyboard
 
 args = useful_fns.parseCmdLineArgs()
 
@@ -43,6 +44,8 @@ socket.bind (bind_str)
 
 params = args.info.split(",")
 print(params)
+start_time = time.time()
+# try:
 while True:
     para = random.choice(params)
     if para == "temp":  # temp
@@ -61,3 +64,27 @@ while True:
     print ("Sending: {}".format (topic))
     socket.send_string (topic)
     time.sleep (0.5)  
+# except KeyboardInterrupt:
+    print("..................................................",time.time()-start_time)
+    if time.time()-start_time > args.duration:
+        # string_send = str("remove" + " " + IP + ":" + PORT + " " + zip_code)
+        # socket_register.send(string_send.encode())
+        # print("removing publisher")
+        # # string_send = str("remove" + " " + IP + ":" + PORT + " " + zip_code)
+        # # socket_register.send(string_send.encode())
+        # message = socket_register.recv().decode()
+        # print(message)
+        # print("removed publisher")
+
+        while True:
+            string_send = str("remove" + " " + IP + ":" + PORT + " " + zip_code)
+            print(string_send)
+            socket_register.send(string_send.encode())
+            print("Attempting to register the device")
+
+            message = socket_register.recv().decode()
+            cm = message.split()
+            if cm[0] == "removed":
+                print(cm[0])
+                break
+        break

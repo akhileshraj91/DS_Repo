@@ -32,25 +32,27 @@ def main ():
             print(cm[0])
             break
 
+    parsed_args = args
+    subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
 
     if cm[1] == "direct":
 
-        string_send = str("QUERY"+" "+zip_code)
-        print(string_send)
-        socket_register.send(string_send.encode())
-        json_data = socket_register.recv_json()
-        print(json_data)
-        lookup_dict = json.loads(json_data)
-        
-        parsed_args = args
+        while True:
+            string_send = str("QUERY"+" "+zip_code)
+            print(string_send)
+            socket_register.send(string_send.encode())
+            json_data = socket_register.recv_json()
+            print(json_data)
+            lookup_dict = json.loads(json_data)
+            print(".........",lookup_dict)
+            if lookup_dict != None:
+                subscriber.addresses = []
 
-        subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
+                subscriber.get_pubs(lookup_dict)
 
-        subscriber.get_pubs(lookup_dict)
+                subscriber.configure ()
 
-        subscriber.configure ()
-
-        subscriber.event_loop ()
+                subscriber.event_loop ()
 
     elif cm[1] == "indirect":
 
@@ -59,9 +61,8 @@ def main ():
         json_data = socket_register.recv_json()
         broker_add = json.loads(json_data)
         
-        parsed_args = args
 
-        subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
+        # subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
         print(broker_add)
 
         subscriber.get_pubs(broker_add, cm[1])
