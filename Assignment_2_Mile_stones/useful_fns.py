@@ -51,7 +51,7 @@ class CS6381_Subscriber():
 
         for i in range(len(self.addresses)):
             address = self.addresses[i]
-            print(address)
+            print("Trying to reach", address)
             connect_str = "tcp://" + address
 
             # print(self.params)
@@ -81,7 +81,7 @@ class CS6381_Subscriber():
 
     def event_loop(self):
         # while True:
-        events = dict(self.poller.poll())
+        events = dict(self.poller.poll(1000))
         for i in range(len(self.addresses)):
             print("event begin")
             if "temp" in self.params and self.temp_socket[i] in events:

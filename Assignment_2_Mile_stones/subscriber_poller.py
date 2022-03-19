@@ -39,10 +39,9 @@ def main ():
 
         while True:
             string_send = str("QUERY"+" "+zip_code)
-            print(string_send)
             socket_register.send(string_send.encode())
+            print("QUERY sent as", string_send)
             json_data = socket_register.recv_json()
-            print(json_data)
             lookup_dict = json.loads(json_data)
             print(".........",lookup_dict)
             if lookup_dict != None:
