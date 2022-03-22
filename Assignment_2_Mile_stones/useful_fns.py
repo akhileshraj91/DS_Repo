@@ -42,6 +42,7 @@ class CS6381_Subscriber():
         self.addresses = []
         self.subscribers = []
         self.name = None
+        self.broker_in_use = 0
 
     def configure(self, strat="direct"):
         self.name = self.zip_code + strat
@@ -85,7 +86,7 @@ class CS6381_Subscriber():
 
     def event_loop(self):
         # while True:
-        events = dict(self.poller.poll(1000))
+        events = dict(self.poller.poll())
         for i in range(len(self.addresses)):
             print("event begin")
             if "temp" in self.params and self.temp_socket[i] in events:
@@ -120,25 +121,27 @@ class CS6381_Subscriber():
             print("completed one event")
 
     def broker_loop(self, PORT):
-        self.socket_broker = self.context.socket(zmq.PUB)
-        self.socket_broker.bind("tcp://*:" + PORT)
-        while True:
-            events = dict(self.poller.poll(1000))
-            for i in range(len(self.addresses)):
-                if "temp" in self.params and self.temp_socket[i] in events:
-                    string = self.temp_socket[i].recv_string()
-                    # print("Subscriber:recv_temp, value = {}".format(string))
-                    self.socket_broker.send_string(string)
+        if not self.broker_in_use:
+            self.socket_broker = self.context.socket(zmq.PUB)
+            self.socket_broker.bind("tcp://*:" + PORT)
+            self.broker_in_use = 1
+        # while True:
+        events = dict(self.poller.poll(1000))
+        for i in range(len(self.addresses)):
+            if "temp" in self.params and self.temp_socket[i] in events:
+                string = self.temp_socket[i].recv_string()
+                # print("Subscriber:recv_temp, value = {}".format(string))
+                self.socket_broker.send_string(string)
 
-                if "humidity" in self.params and self.humidity_socket[i] in events:
-                    string = self.humidity_socket[i].recv_string()
-                    # print("Subscriber:recv_humidity, value = {}".format(string))
-                    self.socket_broker.send_string(string)
+            if "humidity" in self.params and self.humidity_socket[i] in events:
+                string = self.humidity_socket[i].recv_string()
+                # print("Subscriber:recv_humidity, value = {}".format(string))
+                self.socket_broker.send_string(string)
 
-                if "pressure" in self.params and self.pressure_socket[i] in events:
-                    string = self.pressure_socket[i].recv_string()
-                    # print("Subscriber:recv_pressure, value = {}".format(string))
-                    self.socket_broker.send_string(string)
+            if "pressure" in self.params and self.pressure_socket[i] in events:
+                string = self.pressure_socket[i].recv_string()
+                # print("Subscriber:recv_pressure, value = {}".format(string))
+                self.socket_broker.send_string(string)
 
     def get_pubs(self, my_dict, strat="direct"):
         if strat == "indirect":

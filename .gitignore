@@ -2,7 +2,7 @@ Mile_stones/*.xvg
 Mile_stones/__pycache__
 Mile_stones/xterm*
 Mile_stones/XTerm*
-*__pycache__/
+**/__pycache__
 *logs*
 *Xterm*
 *xterm*

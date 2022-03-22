@@ -186,7 +186,7 @@ elif strat == "indirect":
             broker_details = kad_client.get("BROKER")
             data = broker_details
             socket_register.send_json(data)
-            print(broker_details)
+            # print(broker_details)
 
         elif words[0] == "remove":
 

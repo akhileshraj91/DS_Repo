@@ -62,7 +62,7 @@ while True:
 
     print ("Sending: {}".format (topic))
     socket.send_string (topic)
-    time.sleep (0.5)  
+    time.sleep (1)  
 
     if time.time()-start_time > args.duration:
         while True:
@@ -74,4 +74,5 @@ while True:
             if cm[0] == "removed":
                 print(cm[0])
                 break
+
         break

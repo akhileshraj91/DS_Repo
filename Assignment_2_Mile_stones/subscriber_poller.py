@@ -87,6 +87,7 @@ def main ():
 
         while True:
             subscriber.event_loop ()
+            time.sleep(1)
             if time.time()-start_time > args.duration:
                     string_send = str("remove_sub" + " " + IP + ":" + PORT + " " + zip_code)
                     print(string_send)

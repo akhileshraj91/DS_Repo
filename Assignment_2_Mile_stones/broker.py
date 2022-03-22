@@ -43,13 +43,14 @@ if cm[1] == "indirect":
         socket_register.send(string_send.encode())
         json_data = socket_register.recv_json()
         info = json.loads(json_data)
-        print("**********************************",info)
         if info and len(info) > 1:
             PUB = info[0]
             SUB = info[1]
+            print(".///////////////////////////",PUB)
+            print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&",SUB)
             for s in SUB.keys():
-                lookup_dict = PUB[s]
-                if lookup_dict != None:
+                if s in PUB.keys():
+                    lookup_dict = PUB[s]
 
                     subscriber.get_pubs(lookup_dict,"indirect")
 
