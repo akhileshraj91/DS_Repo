@@ -1,7 +1,10 @@
-h1 python kademlia_bootstrap.py -c
-h2 python kademlia_bootstrap.py -i 10.0.0.1
-h3 python kademlia_bootstrap.py -i 10.0.0.1
-h4 python kademlia_bootstrap.py -i 10.0.0.2
-h2 python -u publisher_poller.py &> ./logs/publisher_37209_pressure_logs.out &
-h6 python -u broker.py &> ./logs/broker_logs.out &
-h11 python -u subscriber_poller.py &> ./logs/subscriber_65401_temp_logs.out &
+# useful commands for direct transmission
+h1 python -u registry_server.py &> ./logs/registry_details_logs.out &
+h2 python -u publisher_poller.py -i pressure &> ./logs/publisher_37209_pressure_logs.out &
+h3 python -u subscriber_poller.py -z 65401 -i temp &> ./logs/subscriber_65401_temp_logs.out &
+h4 python -u publisher_poller &> ./logs/publisher_37209_all.logs.out
+
+# useful commands for indirect transmission
+# h1 python -u registry_server.py -s indirect &> ./logs/registry_details_logs.out &
+# h2 python -u publisher_poller.py &> ./logs/publisher_37209_pressure_logs.out &
+# h3 python -u subscriber_poller.py &> ./logs/subscriber_65401_temp_logs.out &
