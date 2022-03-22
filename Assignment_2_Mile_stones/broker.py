@@ -46,8 +46,8 @@ if cm[1] == "indirect":
         if info and len(info) > 1:
             PUB = info[0]
             SUB = info[1]
-            print(".///////////////////////////",PUB)
-            print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&",SUB)
+            # print(".///////////////////////////",PUB)
+            # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&",SUB)
             for s in SUB.keys():
                 if s in PUB.keys():
                     lookup_dict = PUB[s]

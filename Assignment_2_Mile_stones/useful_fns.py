@@ -56,9 +56,9 @@ class CS6381_Subscriber():
 
         for i in range(len(self.addresses)):
             address = self.addresses[i]
-            print("Trying to reach", address)
+            # print("Trying to reach", address)
             connect_str = "tcp://" + address
-            print("reached")
+            # print("reached")
             # print(self.params)
             # print(connect_str)
 
@@ -84,11 +84,12 @@ class CS6381_Subscriber():
                 self.pressure_socket[i].setsockopt_string(zmq.SUBSCRIBE, filter)
                 self.poller.register(self.pressure_socket[i], zmq.POLLIN)
 
+
     def event_loop(self):
         # while True:
         events = dict(self.poller.poll())
         for i in range(len(self.addresses)):
-            print("event begin")
+            # print("event begin")
             if "temp" in self.params and self.temp_socket[i] in events:
                 string = self.temp_socket[i].recv_string()
                 print("Subscriber:recv_temp, value = {}".format(string))
@@ -118,7 +119,16 @@ class CS6381_Subscriber():
                 with open("./logs/%s_trans.csv" % (self.name), 'a', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow([sent_time, recv_time, transmission_time])
-            print("completed one event")
+            # print("completed one event")
+
+
+        self.context = None
+        self.poller = None
+        self.temp_socket = []
+        self.pressure_socket = []
+        self.humidity_socket = []
+        self.addresses = []
+
 
     def broker_loop(self, PORT):
         if not self.broker_in_use:
@@ -142,6 +152,14 @@ class CS6381_Subscriber():
                 string = self.pressure_socket[i].recv_string()
                 # print("Subscriber:recv_pressure, value = {}".format(string))
                 self.socket_broker.send_string(string)
+        
+        self.context = None
+        self.poller = None
+        self.temp_socket = []
+        self.pressure_socket = []
+        self.humidity_socket = []
+        self.addresses = []
+        
 
     def get_pubs(self, my_dict, strat="direct"):
         if strat == "indirect":

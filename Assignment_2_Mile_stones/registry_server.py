@@ -83,7 +83,7 @@ if strat == "direct":
             print("Received request to %s a publisher publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
             if words[2] in publishers.keys():
                 publishers[words[2]].remove(words[1])
-                print("............................",publishers)
+                # print("............................",publishers)
 
             kad_client.set("PUB",json.dumps(publishers))
             message = "removed " + strat
@@ -96,7 +96,7 @@ if strat == "direct":
             print("Received request to %s a subscriber subscribed %s values from the zipcode %s"%(words[0],words[1],words[-1]))
             if words[2] in subscribers.keys():
                 subscribers[words[2]].remove(words[1])
-                print("............................",subscribers)
+                # print("............................",subscribers)
 
             kad_client.set("PUB",json.dumps(subscribers))
             message = "removed " + strat
@@ -151,12 +151,12 @@ elif strat == "indirect":
             details_pub = kad_client.get("PUB")
             details_sub = kad_client.get("SUB")
             data = None
-            print(details_sub, details_pub)
+            # print(details_sub, details_pub)
             if details_pub and details_sub:
                 data = []
                 data.append(json.loads(details_pub))
                 data.append(json.loads(details_sub))
-                print("..............",data)
+                # print("..............",data)
 
             # print(data)
             socket_register.send_json(json.dumps(data))
@@ -194,7 +194,7 @@ elif strat == "indirect":
             print("Received request to %s a publisher publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
             if words[2] in publishers.keys():
                 publishers[words[2]].remove(words[1])
-                print("............................",publishers)
+                # print("............................",publishers)
 
             kad_client.set("PUB",json.dumps(publishers))
             message = "removed " + strat
@@ -207,7 +207,7 @@ elif strat == "indirect":
             print("Received request to %s a subscriber subscribed %s values from the zipcode %s"%(words[0],words[1],words[-1]))
             if words[2] in subscribers.keys():
                 subscribers[words[2]].remove(words[1])
-                print("............................",subscribers)
+                # print("............................",subscribers)
 
             kad_client.set("PUB",json.dumps(subscribers))
             message = "removed " + strat

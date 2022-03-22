@@ -81,13 +81,11 @@ def main ():
         # subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
         print(broker_add)
 
-        subscriber.get_pubs(broker_add, cm[1])
-
-        subscriber.configure ()
 
         while True:
+            subscriber.get_pubs(broker_add, cm[1])
+            subscriber.configure ()
             subscriber.event_loop ()
-            time.sleep(1)
             if time.time()-start_time > args.duration:
                     string_send = str("remove_sub" + " " + IP + ":" + PORT + " " + zip_code)
                     print(string_send)
