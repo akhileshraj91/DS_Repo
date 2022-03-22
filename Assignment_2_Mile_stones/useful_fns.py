@@ -10,6 +10,10 @@ import asyncio
 
 from kademlia_dht import Kademlia_DHT
 
+def Merge(dict1, dict2):
+    res = {**dict1, **dict2}
+    print("^^^^^^^^^^^^^^^^^^^",dict1,"!!",dict2,"##",res)
+    return res
 
 def get_default_addr():
     for interface in netifaces.interfaces():
@@ -53,7 +57,7 @@ class CS6381_Subscriber():
             address = self.addresses[i]
             print("Trying to reach", address)
             connect_str = "tcp://" + address
-
+            print("reached")
             # print(self.params)
             # print(connect_str)
 
@@ -119,21 +123,21 @@ class CS6381_Subscriber():
         self.socket_broker = self.context.socket(zmq.PUB)
         self.socket_broker.bind("tcp://*:" + PORT)
         while True:
-            events = dict(self.poller.poll())
+            events = dict(self.poller.poll(1000))
             for i in range(len(self.addresses)):
                 if "temp" in self.params and self.temp_socket[i] in events:
                     string = self.temp_socket[i].recv_string()
-                    print("Subscriber:recv_temp, value = {}".format(string))
+                    # print("Subscriber:recv_temp, value = {}".format(string))
                     self.socket_broker.send_string(string)
 
                 if "humidity" in self.params and self.humidity_socket[i] in events:
                     string = self.humidity_socket[i].recv_string()
-                    print("Subscriber:recv_humidity, value = {}".format(string))
+                    # print("Subscriber:recv_humidity, value = {}".format(string))
                     self.socket_broker.send_string(string)
 
                 if "pressure" in self.params and self.pressure_socket[i] in events:
                     string = self.pressure_socket[i].recv_string()
-                    print("Subscriber:recv_pressure, value = {}".format(string))
+                    # print("Subscriber:recv_pressure, value = {}".format(string))
                     self.socket_broker.send_string(string)
 
     def get_pubs(self, my_dict, strat="direct"):
@@ -318,3 +322,7 @@ class KademliaClient:
             await self.kademlia_node.bootstrap(self.kademlia_hosts)
         except Exception as e:
             print(e, flush=True)
+
+
+
+

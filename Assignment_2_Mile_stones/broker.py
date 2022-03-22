@@ -21,6 +21,10 @@ srv_addr = "10.0.0.1"
 connect_str = "tcp://" + srv_addr + ":5555"
 socket_register.connect (connect_str)
 kind = "BROKER"
+parsed_args = args
+subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
+
+
 while True:
     string_send = str(kind + " " + IP + ":" + PORT)
 
@@ -35,24 +39,23 @@ while True:
 
 if cm[1] == "indirect":
     while True:
-        string_send = str("QUERY"+ " " + zip_code)
+        string_send = str("QUERY")
         socket_register.send(string_send.encode())
         json_data = socket_register.recv_json()
-        lookup_dict = json.loads(json_data)
-        
-        print(lookup_dict)
-        parsed_args = args
+        info = json.loads(json_data)
+        print("**********************************",info)
+        if info and len(info) > 1:
+            PUB = info[0]
+            SUB = info[1]
+            for s in SUB.keys():
+                lookup_dict = PUB[s]
+                if lookup_dict != None:
 
-        subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
+                    subscriber.get_pubs(lookup_dict,"indirect")
 
-        print(lookup_dict)
-        if lookup_dict != None:
+                    subscriber.configure ("indirect broker")
 
-            subscriber.get_pubs(lookup_dict,"indirect")
-
-            subscriber.configure ("indirect broker")
-
-            subscriber.broker_loop (PORT)
-        else:
-            continue
+                    subscriber.broker_loop (PORT)
+                else:
+                    continue
     

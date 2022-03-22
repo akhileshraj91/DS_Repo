@@ -4,6 +4,7 @@ import zmq
 import useful_fns
 from random import randrange
 import json
+import time
 
 def main ():
     args = useful_fns.parseCmdLineArgs()
@@ -34,16 +35,18 @@ def main ():
 
     parsed_args = args
     subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
+    start_time = time.time()    
+
 
     if cm[1] == "direct":
-
+        # try:
         while True:
             string_send = str("QUERY"+" "+zip_code)
             socket_register.send(string_send.encode())
-            print("QUERY sent as", string_send)
+            # print("QUERY sent as", string_send)
             json_data = socket_register.recv_json()
             lookup_dict = json.loads(json_data)
-            print(".........",lookup_dict)
+            # print(".........",lookup_dict)
             if lookup_dict != None:
                 subscriber.addresses = []
 
@@ -52,6 +55,20 @@ def main ():
                 subscriber.configure ()
 
                 subscriber.event_loop ()
+
+            if time.time()-start_time > args.duration:
+                    string_send = str("remove_sub" + " " + IP + ":" + PORT + " " + zip_code)
+                    print(string_send)
+                    socket_register.send(string_send.encode())
+                    print("Attempting to register the device")
+
+                    message = socket_register.recv().decode()
+                    cm = message.split()
+                    if cm[0] == "removed":
+                        print(cm[0])
+                        break
+                
+
 
     elif cm[1] == "indirect":
 
@@ -68,7 +85,19 @@ def main ():
 
         subscriber.configure ()
 
-        subscriber.event_loop ()
+        while True:
+            subscriber.event_loop ()
+            if time.time()-start_time > args.duration:
+                    string_send = str("remove_sub" + " " + IP + ":" + PORT + " " + zip_code)
+                    print(string_send)
+                    socket_register.send(string_send.encode())
+                    print("Attempting to register the device")
+
+                    message = socket_register.recv().decode()
+                    cm = message.split()
+                    if cm[0] == "removed":
+                        print(cm[0])
+                        break
 
     
 #----------------------------------------------

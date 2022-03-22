@@ -31,10 +31,10 @@ print(args)
 if strat == "direct":
 
     while True:
-        print("executing loop")
+        # print("executing loop")
         # print("$$$$$$$$$ looping")
         message = socket_register.recv()
-        print(message)
+        # print(message)
         words = message.decode().split()
 
         if words[0] == "PUB":
@@ -51,6 +51,7 @@ if strat == "direct":
             message = "registered " + strat
             socket_register.send(message.encode())
             print("Publsiher %s successfully registered"%words[1])
+            print(publishers)
             
         elif words[0] == "SUB":
             if words[2] in subscribers.keys():
@@ -68,53 +69,39 @@ if strat == "direct":
 
         elif words[0] == "QUERY":
             details = kad_client.get("PUB")
-            print(words[1], publishers.keys())
+            # print(words[1], publishers.keys())
             if words[1] in publishers.keys():
                 data = json.loads(details)[words[1]]
             else:
                 data = None
-            print(".........................................................",data)
+            # print(".........................................................",data)
             socket_register.send_json(json.dumps(data))
 
         elif words[0] == "remove":
-            # if words[2] in publishers.keys():
-            #     publishers[words[2]].remove(words[1])
-            #     print("the publisher is removed")
-            #     print(publishers)
-            #     kad_client.set("PUB",json.dumps(publishers))
-            #     details = kad_client.get("PUB")
-            #     data = json.loads(details)[words[2]]
-            #     print("###",data)
-            #     # data = "empty"
-            #     socket_register.send(data.encode())
-            #     time.sleep(0.5)
-            #     print("********")
-            #     # continue
+
 
             print("Received request to %s a publisher publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
             if words[2] in publishers.keys():
                 publishers[words[2]].remove(words[1])
                 print("............................",publishers)
 
-            #     publishers[words[2]].append(words[1])
-            #     print("the repo was already present")
-            # else:
-            #     publishers[words[2]] = []
-            #     publishers[words[2]].append(words[1])
-            #     print("the repo was just created")
-
             kad_client.set("PUB",json.dumps(publishers))
             message = "removed " + strat
             socket_register.send(message.encode())
             print("Publsiher %s successfully removed"%words[1])
 
-            # details = kad_client.get("PUB")
-            # if words[1] in publishers.keys():
-            #     data = json.loads(details)[words[1]]
-            # else:
-            #     data = None
-            # print(data)
-            # socket_register.send_json(json.dumps(data))
+        elif words[0] == "remove_sub":
+
+
+            print("Received request to %s a subscriber subscribed %s values from the zipcode %s"%(words[0],words[1],words[-1]))
+            if words[2] in subscribers.keys():
+                subscribers[words[2]].remove(words[1])
+                print("............................",subscribers)
+
+            kad_client.set("PUB",json.dumps(subscribers))
+            message = "removed " + strat
+            socket_register.send(message.encode())
+            print("Subscriber %s successfully removed"%words[1])
 
 
 
@@ -157,16 +144,36 @@ elif strat == "indirect":
             message = "registered " + strat
             socket_register.send(message.encode())
             print("Subscriber %s successfully registered"%words[1])
+            # print(subscribers)
 
         elif words[0] == "QUERY":
-            details = kad_client.get("PUB")
-            print(words[1], publishers.keys())
-            if words[1] in publishers.keys():
-                data = json.loads(details)[words[1]]
-            else:
-                data = None
-            print(".........................................................",data)
+            # print("..................................", words)
+            details_pub = kad_client.get("PUB")
+            details_sub = kad_client.get("SUB")
+            data = None
+            print(details_sub, details_pub)
+            if details_pub and details_sub:
+                data = []
+                data.append(json.loads(details_pub))
+                data.append(json.loads(details_sub))
+                print("..............",data)
+
+            # print(data)
             socket_register.send_json(json.dumps(data))
+
+            # for sub in subscribers.keys():
+            #     print(sub)
+            #     if sub in publishers.keys():
+            #         data = json.loads(details)[sub]
+            #     # else:
+            #     #     data = None
+            #     # print(".........................................................",data)
+            #     socket_register.send_json(json.dumps(data))
+            #     print("..............",data)
+            #     flag = 1
+            # if flag == 0:
+            #     socket_register.send_json(json.dumps(data))
+
             
         elif words[0] == "BROKER":
             broker_details[words[1]] = words[0]
@@ -180,6 +187,32 @@ elif strat == "indirect":
             data = broker_details
             socket_register.send_json(data)
             print(broker_details)
+
+        elif words[0] == "remove":
+
+
+            print("Received request to %s a publisher publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
+            if words[2] in publishers.keys():
+                publishers[words[2]].remove(words[1])
+                print("............................",publishers)
+
+            kad_client.set("PUB",json.dumps(publishers))
+            message = "removed " + strat
+            socket_register.send(message.encode())
+            print("Publsiher %s successfully removed"%words[1])
+
+        elif words[0] == "remove_sub":
+
+
+            print("Received request to %s a subscriber subscribed %s values from the zipcode %s"%(words[0],words[1],words[-1]))
+            if words[2] in subscribers.keys():
+                subscribers[words[2]].remove(words[1])
+                print("............................",subscribers)
+
+            kad_client.set("PUB",json.dumps(subscribers))
+            message = "removed " + strat
+            socket_register.send(message.encode())
+            print("Subscriber %s successfully removed"%words[1])
 
 else:
     print("wrong strategy")
