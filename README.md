@@ -11,7 +11,7 @@ Prefer the following bash scripting with your python preferences.
 
 ```bash
 git clone https://github.com/mininet/mininet
-sudo PYTHON=python3 make install -a
+sudo PYTHON=python3 mininet/util/install.sh -n 
 ```
 for easy and error free installation.
 ## Usage
@@ -54,12 +54,12 @@ which will open the xterm corresponding to node h1 where you can directly run th
 
 Make sure to always execute the registry_server on the node h1. The network is hosted with the registry information running on host 1. The rest of the commands you are free to execute on any node. 
 
-Only make sure that you execute the commands in the following order:
+If you are working on Assignment 1 make sure to execute the commands in the following order:
 - publisher
 - broker
 - subscriber
 
-Atleast for this version this order is preferred. It is expected to change from the next version onwards.
+In case of the Assignment 2 you are free to use any kind of order. Due to the traffic involved in the broker it is likely to crash which will be rectified soon in Assignment 3.
 
 After Execution you can use the plotting.py to undestand the latency associated with the data transmission.
 
