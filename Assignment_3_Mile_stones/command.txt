@@ -1,0 +1,29 @@
+h1 python -u registry_server.py &> ./logs/registry_details_logs.out &
+h2 python -u publisher_poller.py -i pressure &> ./logs/publisher_37209_pressure_logs.out &
+h3 python -u subscriber_poller.py -z 65401 -i temp &> ./logs/subscriber_65401_temp_logs.out &
+h4 python -u publisher_poller -z 68001 &> ./logs/publisher_68001_all.logs.out
+h6 python -u publisher_poller.py -z 68912 -i pressure &> ./logs/publisher_68912_pressure_logs.out &
+h7 python -u subscriber_poller.py -z 68001 -z 65401 -i temp &> ./logs/subscriber_68001_temp_logs.out &
+h8 python -u publisher_poller -z 37263 &> ./logs/publisher_37263_all.logs.out
+h10 python -u publisher_poller.py -z 65444 -i pressure &> ./logs/publisher_65444_pressure_logs.out &
+h11 python -u subscriber_poller.py -z 65444 -i temp &> ./logs/subscriber_65444_temp_logs.out &
+h12 python -u publisher_poller -z 68001 &> ./logs/publisher_68001_all.logs.out
+h14 python -u publisher_poller.py -z 68001 -i pressure &> ./logs/publisher_68001_pressure_logs.out &
+h15 python -u subscriber_poller.py -z 37263 -z 65401 -i temp &> ./logs/subscriber_37263_temp_logs.out &
+h16 python -u publisher_poller -z 12335 &> ./logs/publisher_68001_all.logs.out
+h18 python -u publisher_poller.py -z 12345 -i pressure &> ./logs/publisher_68001_pressure_logs.out &
+h19 python -u subscriber_poller.py -z 12345 -i temp &> ./logs/subscriber_12345_temp_logs.out &
+h20 python -u publisher_poller -z 44444 &> ./logs/publisher_44444_all.logs.out
+h22 python -u publisher_poller.py -z 45555 -i pressure &> ./logs/publisher_45555_pressure_logs.out &
+h23 python -u subscriber_poller.py -z 65401 -i temp &> ./logs/subscriber_65401_temp_logs.out &
+h24 python -u publisher_poller -z 12335 &> ./logs/publisher_37209_all.logs.out
+h26 python -u publisher_poller.py -z 12335 -i pressure &> ./logs/publisher_37209_pressure_logs.out &
+h27 python -u subscriber_poller.py -z 12335 -i temp &> ./logs/subscriber_65401_temp_logs.out &
+h28 python -u publisher_poller -z 12322 &> ./logs/publisher_37209_all.logs.out
+h29 python -u subscriber_poller.py -z 12322 -i temp &> ./logs/subscriber_12322_temp_logs.out &
+h30 python -u subscriber_poller.py -z 68001 -i temp &> ./logs/subscriber_68001_temp_logs.out &
+
+
+
+
+
