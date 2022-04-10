@@ -22,9 +22,12 @@ def zk_main (val):
     value = None
     # while value == None:
     # print("/MAIN/leaders/%s"%val)
-    value, stat = client.zk.get ("/MAIN/leaders/%s"%val)
-    # print(value.decode())
-    return value.decode()  
+    if client.zk.exists ("/MAIN/leaders/%s"%val):
+        print("/MAIN/leaders/%s"%val+"exists")
+        value, stat = client.zk.get ("/MAIN/leaders/%s"%val)
+        value = value.decode()
+        # print(value.decode())
+    return value 
 
 
 def main():
@@ -47,9 +50,9 @@ def main():
 
 
     while True:
-
+        time.sleep(1)
         bro = zk_main("broker")
-        print(bro)
+        # print("________________________________________",bro,IP)
 
         if bro == IP:
             string_send = str(kind + " " + IP + ":" + PORT)

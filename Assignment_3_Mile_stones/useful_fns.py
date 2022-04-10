@@ -37,6 +37,7 @@ class ZK_ClientApp ():
         self.ppath = "/MAIN"
         self.registerpath = "/MAIN/register"
         self.brokerpath = "/MAIN/broker" 
+        self.bleaderpath = "/MAIN/leaders"
         self.zk = None  
         self.flag = False 
 
@@ -65,8 +66,12 @@ class ZK_ClientApp ():
                         self.zk.set (self.ppath+"/"+"leaders"+"/"+ "register",value=self.IP.encode())
 
                     elif "broker" in self.name:
-                        self.zk.create (self.brokerpath+"/"+self.name,value=self.IP.encode())
-                        self.zk.set (self.ppath+"/"+"leaders"+"/"+ "broker",value=self.IP.encode())
+                        self.zk.create (self.brokerpath+"/"+self.name,value=self.IP.encode(),ephemeral=True)
+                        value,data = self.zk.get(self.ppath+"/"+"leaders"+"/"+ "broker")
+                        print(value.decode(),type(value.decode()))
+                        if value.decode() == '0':
+                            self.zk.delete (self.bleaderpath+"/"+"broker",recursive=True)
+                            self.zk.create (self.bleaderpath+"/"+"broker",value=self.IP.encode(),ephemeral=True)
 
 
                     else:
@@ -84,23 +89,33 @@ class ZK_ClientApp ():
                     self.zk.create (self.ppath,value=b'0')
                     self.zk.create (self.brokerpath,value=b'0')
                     self.zk.create (self.registerpath,value=b'0')
-                    self.zk.create (self.ppath+"/"+"leaders",value=b'0')
-                    self.zk.create (self.ppath+"/"+"leaders"+"/"+ "register",value=b'0')
-                    self.zk.create (self.ppath+"/"+"leaders"+"/"+ "broker",value=b'0')
-                    time.sleep(1)
+                    self.zk.create (self.bleaderpath,value=b'0')
+                    self.zk.create (self.bleaderpath+"/"+"broker",value=b'0',ephemeral=True)
+                    self.zk.create (self.bleaderpath+"/"+ "register",value=b'0',ephemeral=True)
+                    # time.sleep(1)
 
 
 
 
 
-            @self.zk.ChildrenWatch (self.brokerpath)
+            @self.zk.ChildrenWatch (self.bleaderpath)
             def child_change_watcher (children):
                 print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
-                if self.zk.exists (self.brokerpath):
-                    # print("________________________________",children, len(children))
-                    if children:
-                        leader = random.choice(children)
+                print("Triggered the watcher")
+                if self.zk.exists (self.bleaderpath+"/"+"broker"):
+                    print("path exists")  
+
+                elif self.zk.exists (self.brokerpath):
+                    print("leader is gone")  
+                    all_broker_children = self.zk.get_children(self.brokerpath)
+                    print("_________________________________", all_broker_children)
+                    if all_broker_children:
+                        leader = random.choice(all_broker_children)
+                        value,data = self.zk.get(self.brokerpath+"/"+leader)
+                        print(value.decode())
                         print("________________________________leader is : ", leader)
+                        self.zk.create (self.bleaderpath+"/"+"broker",value=value)
+
                 else:
                     print ("Driver:run_driver -- child watcher -- znode does not exist")
 
@@ -112,7 +127,7 @@ class ZK_ClientApp ():
 
 def Merge(dict1, dict2):
     res = {**dict1, **dict2}
-    print("^^^^^^^^^^^^^^^^^^^",dict1,"!!",dict2,"##",res)
+    # print("^^^^^^^^^^^^^^^^^^^",dict1,"!!",dict2,"##",res)
     return res
 
 def get_default_addr():
@@ -187,7 +202,7 @@ class CS6381_Subscriber():
 
     def event_loop(self):
         # while True:
-        events = dict(self.poller.poll())
+        events = dict(self.poller.poll(5000))
         for i in range(len(self.addresses)):
             # print("event begin")
             if "temp" in self.params and self.temp_socket[i] in events:
