@@ -56,62 +56,41 @@ class ZK_ClientApp ():
 
     def run_client (self):
         try:
-            self.zk.start ()
-            # @self.zk.ChildrenWatch (self.brokerpath)
-            # def child_change_watcher (children):
-            #     print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
-            #     if self.zk.exists (self.brokerpath):
-            #         # print("________________________________",children, len(children))
-            #         if children:
-            #             leader = random.choice(children)
-            #             print("________________________________leader is : ", leader)
-            #     else:
-            #         print ("Driver:run_driver -- child watcher -- znode does not exist")
-
+            self.zk.start()
             while (True):
-
+                print(self.ppath)
                 if self.zk.exists (self.ppath):
-                    print(("ClientApp::run {} - parent znode is set".format (self.name)))
-                    # in that case we create our child node
-                    if self.zk.exists(self.ppath+str("/")+self.name):
-                        self.zk.set (self.ppath + str ("/") + self.name , value=self.IP.encode())
+                    if "register" in self.name:
+                        self.zk.create (self.registerpath+"/"+self.name,value=self.IP.encode())
+                        self.zk.set (self.ppath+"/"+"leaders"+"/"+ "register",value=self.IP.encode())
+
+                    elif "broker" in self.name:
+                        self.zk.create (self.brokerpath+"/"+self.name,value=self.IP.encode())
+                        self.zk.set (self.ppath+"/"+"leaders"+"/"+ "broker",value=self.IP.encode())
+
+
+                    else:
+                        self.zk.create (self.ppath + str ("/") + self.name, value=self.IP.encode())
                         if "register" in self.name:
                             self.zk.set (self.registerpath+"/"+ self.name,value=self.IP.encode())
                         if "broker" in self.name:
                             self.zk.set (self.brokerpath+"/"+self.name,value=self.IP.encode())
-                    else:
-                        self.zk.create (self.ppath + str ("/") + self.name, value=self.IP.encode())
-                        # self.zk.create (self.ppath + str ("/") + self.name, value=self.IP.encode())
- 
                     break
+
+
                 else:
-                    self.zk.create (self.ppath, value=b"0")
+                    print(("ClientApp::run {} - parent znode is set".format (self.name)))
+                    self.zk.start ()
+                    self.zk.create (self.ppath,value=b'0')
+                    self.zk.create (self.brokerpath,value=b'0')
+                    self.zk.create (self.registerpath,value=b'0')
                     self.zk.create (self.ppath+"/"+"leaders",value=b'0')
-                    if self.name == "register":
-                        self.zk.create (self.ppath+"/"+"leaders"+"/"+ "register",value=self.IP.encode())
-                    if self.name == "broker":
-                        self.zk.create (self.ppath+"/"+"leaders"+"/"+ "broker",value=self.IP.encode())
+                    self.zk.create (self.ppath+"/"+"leaders"+"/"+ "register",value=b'0')
+                    self.zk.create (self.ppath+"/"+"leaders"+"/"+ "broker",value=b'0')
+                    time.sleep(1)
 
 
 
-
-                    print(("ClientApp::run {} -- parent znode is not yet up".format (self.name)))
-                    time.sleep (1)
-
-
-            # @self.zk.DataWatch (self.ppath)
-            # def data_change_watcher (data, stat):
-            #     print(("ClientApp::DataChangeWatcher {} - data = {}, stat = {}".format (self.name, data, stat)))
-            #     value = int (data)
-
-
-            # @self.zk.ChildrenWatch (self.ppath)
-            # def child_change_watcher (children):
-            #     print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
-            #     if self.zk.exists (self.ppath):
-            #         print("________________________________",children)
-            #     else:
-            #         print ("Driver:run_driver -- child watcher -- znode does not exist")
 
 
             @self.zk.ChildrenWatch (self.brokerpath)
@@ -125,23 +104,6 @@ class ZK_ClientApp ():
                 else:
                     print ("Driver:run_driver -- child watcher -- znode does not exist")
 
-
-
-            count = 0        
-            while count < 10:
-                count+=1
-                time.sleep(1)
-            # self.zk.delete (self.ppath, recursive=True)
-
-
-
-    
-            # if self.flag:
-            #     self.zk.stop ()
-            #     self.zk.close ()
-
-
-            # print(("ClientApp {}: Bye Bye ".format (self.name)))
     
         except:
             print("Unexpected error in ClientApp::run", sys.exc_info()[0])

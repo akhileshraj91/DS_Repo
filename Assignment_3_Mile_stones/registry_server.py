@@ -190,6 +190,7 @@ elif strat == "indirect":
 
             
         elif words[0] == "BROKER":
+            print("__________________________________________________________BROKER",broker_details)
             broker_details[words[1]] = words[0]
             kad_client.set("BROKER",json.dumps(broker_details))
             message = "registered " + strat
