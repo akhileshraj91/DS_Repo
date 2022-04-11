@@ -23,7 +23,7 @@ def zk_main (val):
     # while value == None:
     # print("/MAIN/leaders/%s"%val)
     if client.zk.exists ("/MAIN/leaders/%s"%val):
-        print("/MAIN/leaders/%s"%val+"exists")
+        # print("/MAIN/leaders/%s"%val+"exists")
         value, stat = client.zk.get ("/MAIN/leaders/%s"%val)
         value = value.decode()
         # print(value.decode())
