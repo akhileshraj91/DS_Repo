@@ -99,54 +99,24 @@ class ZK_ClientApp ():
 
 
 
-            @self.zk.ChildrenWatch (self.bleaderpath)
-            def child_change_watcher (children):
-                # val,dat = self.zk.get(self.bleaderpath+"/"+"broker")
-                # if val != b'0':
-                #     self.zk.delete (self.bleaderpath+"/"+"broker",recursive=True) 
-                print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
-                print("Triggered the watcher")
-                if self.zk.exists (self.brokerpath):
-                    all_broker_children = self.zk.get_children(self.brokerpath)
-                    if all_broker_children:
-                        new_leader = random.choice(all_broker_children)
-                        value,data = self.zk.get(self.brokerpath+"/"+new_leader)
+            if "broker" in self.name:
+                @self.zk.ChildrenWatch (self.bleaderpath)
+                def child_change_watcher (children):
 
-                if self.zk.exists (self.bleaderpath+"/"+"broker"):
-                    print("path exists")  
+                    print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
+                    print("Triggered the watcher")
 
-                else:
-                    # self.zk.delete (self.bleaderpath+"/"+"broker",recursive=True) 
-                    try:
-                        self.zk.create (self.bleaderpath+"/"+"broker",value=value,ephemeral=True)
-                        print("Leader reinitialized..............................................")
-                    except:
-                        value,data = self.zk.get(self.bleaderpath+"/"+"broker")
-                        print(value,data)
+                    if self.zk.exists (self.bleaderpath+"/"+"broker"):
+                        print("path exists")  
 
-
-
-
-                # time.sleep(1)
-                # if self.zk.exists (self.bleaderpath+"/"+"broker"):
-                #     print("path exists")  
-
-                # elif self.zk.exists (self.brokerpath):
-                #     print("leader is gone")  
-                #     all_broker_children = self.zk.get_children(self.brokerpath)
-                #     print("_________________________________", all_broker_children)
-                #     if all_broker_children:
-                #         leader = random.choice(all_broker_children)
-                #         value,data = self.zk.get(self.brokerpath+"/"+leader)
-                #         print(value.decode())
-                #         print("________________________________The chosen leader is : ", leader)
-                #         if self.zk.exists (self.bleaderpath+"/"+"broker")==False:
-                #             self.zk.create (self.bleaderpath+"/"+"broker",value=value, ephemeral=True)
-                #             print("LEader reinitialized..............................................")
-
-
-                # else:
-                #     print ("Driver:run_driver -- child watcher -- znode does not exist")
+                    else:
+                        # self.zk.delete (self.bleaderpath+"/"+"broker",recursive=True) 
+                        try:
+                            self.zk.create (self.bleaderpath+"/"+"broker",value=self.IP.encode(),ephemeral=True)
+                            print("Leader reinitialized..............................................")
+                        except:
+                            value,data = self.zk.get(self.bleaderpath+"/"+"broker")
+                            print(value,data)
 
     
         except:

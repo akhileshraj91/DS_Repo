@@ -172,26 +172,13 @@ elif strat == "indirect":
                 data.append(json.loads(details_sub))
                 # print("..............",data)
 
-            # print(data)
             socket_register.send_json(json.dumps(data))
 
-            # for sub in subscribers.keys():
-            #     print(sub)
-            #     if sub in publishers.keys():
-            #         data = json.loads(details)[sub]
-            #     # else:
-            #     #     data = None
-            #     # print(".........................................................",data)
-            #     socket_register.send_json(json.dumps(data))
-            #     print("..............",data)
-            #     flag = 1
-            # if flag == 0:
-            #     socket_register.send_json(json.dumps(data))
+
 
             
         elif words[0] == "BROKER":
-            # print("__________________________________________________________BROKER",words, broker_details)
-            # print("///////////////////////",words[1],words[0])
+
             broker_details = {}
             broker_details[words[1]] = words[0]
             kad_client.set("BROKER",json.dumps(broker_details))
