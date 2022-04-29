@@ -68,6 +68,7 @@ class ZK_ClientApp ():
 
                     elif "broker" in self.name:
                         self.zk.create (self.brokerpath+"/"+self.name,value=self.IP.encode(),ephemeral=True)
+                        self.zk.create (self.ppath+"/"+"active_brokers"+"/"+self.name,value=self.IP.encode(),ephemeral=True)
                         value,data = self.zk.get(self.ppath+"/"+"leaders"+"/"+ "broker")
                         bro_count,_ = self.zk.get(self.brokerpath) 
                         # print("___________________",bro_count.decode())
@@ -88,10 +89,12 @@ class ZK_ClientApp ():
                             self.zk.set (self.registerpath+"/"+ self.name,value=self.IP.encode())
                         if "broker" in self.name:
                             self.zk.set (self.brokerpath+"/"+self.name,value=self.IP.encode())
+
                         if "sub" in self.name:
                             sub_count,_ = self.zk.get(self.ppath+"/"+"subscribers")
                             sc = sub_count.decode() 
                             new_sc = str(int(sc)+1)
+                            # print("""""""""""""""""""""""""""""""""""",new_sc)
                             self.zk.set (self.ppath+"/"+"subscribers",value=new_sc.encode())
                     break
 
@@ -106,6 +109,7 @@ class ZK_ClientApp ():
                     self.zk.create (self.bleaderpath+"/"+"broker",value=b'0',ephemeral=True)
                     self.zk.create (self.bleaderpath+"/"+ "register",value=b'0',ephemeral=True)
                     self.zk.create (self.ppath+"/"+"subscribers",value=b'0')
+                    self.zk.create (self.ppath+"/"+"active_brokers",value=b'0')
 
                     # time.sleep(1)
 

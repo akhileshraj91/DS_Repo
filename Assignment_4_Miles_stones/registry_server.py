@@ -7,7 +7,7 @@ import time
 # from useful_fns import *
 
 
-def zk_main ():
+def zk_main (val = None):
 
     print("Registering the register with zookeeper")
 
@@ -18,6 +18,11 @@ def zk_main ():
     client.init_client ()
     
     client.run_client ()
+
+    if val == "B":
+        if client.zk.exists ("/MAIN/active_brokers"):
+           B_list = client.zk.get_children("/MAIN/active_brokers")
+           return B_list
 
 zk_main()
 
@@ -34,6 +39,7 @@ socket_register.bind ("tcp://*:5555")
 publishers = {}
 subscribers = {}
 broker_details = {}
+BS_data = {}
 args = useful_fns.parseCmdLineArgs()
 
 strat = args.strategy
@@ -149,11 +155,17 @@ elif strat == "indirect":
         elif words[0] == "SUB":
             if words[2] in subscribers.keys():
                 subscribers[words[2]].append(words[1])
+                broker_details = kad_client.get("BROKER")
+                BS_data[words[1]] = broker_details
                 print("the repo was already present")
             else:
                 subscribers[words[2]] = []
                 subscribers[words[2]].append(words[1])
                 print("the repo was just created")
+                broker_details = kad_client.get("BROKER")
+                BS_data[words[1]] = broker_details
+                print("______________________________________",BS_data)
+
             kad_client.set("SUB",json.dumps(subscribers))
             message = "registered " + strat
             socket_register.send(message.encode())
@@ -192,9 +204,17 @@ elif strat == "indirect":
             socket_register.send_json(data)
             # print(broker_details)
 
+        elif words[0] == "BROKER_list_Q":
+            # print("^^^^^^^^^^^",words)
+            broker_details = zk_main("B")
+            print("_______________________________________",BS_data,words[1])
+
+            data = BS_data[words[1]]
+            print(data)
+            socket_register.send_json(data)
+            # print(broker_details)    
+
         elif words[0] == "remove":
-
-
             print("Received request to %s a publisher publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
             if words[2] in publishers.keys():
                 publishers[words[2]].remove(words[1])
