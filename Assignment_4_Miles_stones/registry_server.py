@@ -7,24 +7,23 @@ import time
 # from useful_fns import *
 
 
+print("Registering the register with zookeeper")
+
+parsed_args = useful_fns.parseCmdLineArgs ()
+
+client = useful_fns.ZK_ClientApp (parsed_args)
+
+client.init_client ()
+
+client.run_client ()
+
 def zk_main (val = None):
-
-    print("Registering the register with zookeeper")
-
-    parsed_args = useful_fns.parseCmdLineArgs ()
-    
-    client = useful_fns.ZK_ClientApp (parsed_args)
-
-    client.init_client ()
-    
-    client.run_client ()
-
     if val == "B":
         if client.zk.exists ("/MAIN/active_brokers"):
            B_list = client.zk.get_children("/MAIN/active_brokers")
            return B_list
 
-zk_main()
+# zk_main()
 
 IP = useful_fns.get_default_addr()
 
@@ -164,7 +163,7 @@ elif strat == "indirect":
                 print("the repo was just created")
                 broker_details = kad_client.get("BROKER")
                 BS_data[words[1]] = broker_details
-                print("______________________________________",BS_data)
+                # print("______________________________________",BS_data)
 
             kad_client.set("SUB",json.dumps(subscribers))
             message = "registered " + strat
@@ -207,10 +206,10 @@ elif strat == "indirect":
         elif words[0] == "BROKER_list_Q":
             # print("^^^^^^^^^^^",words)
             broker_details = zk_main("B")
-            print("_______________________________________",BS_data,words[1])
+            # print("_______________________________________",BS_data,words[1])
 
             data = BS_data[words[1]]
-            print(data)
+            # print(data)
             socket_register.send_json(data)
             # print(broker_details)    
 

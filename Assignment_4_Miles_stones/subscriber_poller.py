@@ -125,12 +125,12 @@ def main ():
             string_send = str("BROKER_list_Q" + " " + IP + ":" + PORT)
             socket_register.send(string_send.encode())
             json_data = socket_register.recv_json()
-            print(json_data)
+            # print(json_data)
             broker_add = json.loads(json_data)
             
 
             # subscriber =  useful_fns.CS6381_Subscriber (parsed_args)
-            print(broker_add)
+            # print(broker_add)
             subscriber.get_pubs(broker_add, cm[1])
             subscriber.configure ()
             subscriber.event_loop ()

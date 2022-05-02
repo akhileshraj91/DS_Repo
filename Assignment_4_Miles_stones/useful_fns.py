@@ -16,7 +16,6 @@ import random
 
 from kazoo.client import KazooClient
 
-
 import logging
 
 
@@ -91,6 +90,7 @@ class ZK_ClientApp ():
                             self.zk.set (self.brokerpath+"/"+self.name,value=self.IP.encode())
 
                         if "sub" in self.name:
+                            self.zk.create (self.ppath+"/"+"subscribers"+"/"+self.name,value=self.IP.encode(),ephemeral=True)
                             sub_count,_ = self.zk.get(self.ppath+"/"+"subscribers")
                             sc = sub_count.decode() 
                             new_sc = str(int(sc)+1)
@@ -110,6 +110,7 @@ class ZK_ClientApp ():
                     self.zk.create (self.bleaderpath+"/"+ "register",value=b'0',ephemeral=True)
                     self.zk.create (self.ppath+"/"+"subscribers",value=b'0')
                     self.zk.create (self.ppath+"/"+"active_brokers",value=b'0')
+                    self.zk.create (self.ppath+"/"+"BS_data",value=b'0')
 
                     # time.sleep(1)
 
@@ -160,13 +161,17 @@ class ZK_ClientApp ():
                         while True:
                             available_brokers = self.zk.get_children(self.brokerpath)
                             new_leader = random.choice(available_brokers)
-                            # print(new_leader)
+                            print(new_leader)
+
                             new_ip,_ = self.zk.get(self.brokerpath+"/"+new_leader)
                             print(new_ip)
-                            print("_______________________",new_ip.decode())
+                            self.zk.delete (self.brokerpath+"/"+new_leader,recursive=True)
+
+                            # print("_______________________",new_ip.decode())
                             new_val = new_ip.decode()
                             old_val,_ = self.zk.get(self.bleaderpath+"/"+"broker")
                             old_val = old_val.decode()
+                            print("___",old_val)
                             if new_val != old_val:
                                 self.zk.set (self.bleaderpath+"/"+"broker",new_val.encode())
                                 self.zk.set (self.ppath+"/"+"subscribers",value=b'0')
@@ -178,6 +183,21 @@ class ZK_ClientApp ():
                     # if (value == self.cond):
                     #     print(("ClientApp: {}, barrier is reached".format (self.name)))
                     #     self.barrier = True
+                @self.zk.ChildrenWatch (self.ppath+"/"+"subscribers") 
+                def child_change_watcher (children):
+                    print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
+                    print("Triggered the watcher")
+
+                    if self.zk.exists (self.bleaderpath+"/"+"broker"):
+                        print("path exists")  
+
+                    else:
+                        try:
+                            self.zk.create (self.bleaderpath+"/"+"broker",value=self.IP.encode(),ephemeral=True)
+                            print("Leader reinitialized..............................................")
+                        except:
+                            value,data = self.zk.get(self.bleaderpath+"/"+"broker")
+                            print(value,data)
 
     
         except:
