@@ -137,6 +137,7 @@ elif strat == "indirect":
 
         # print(words)
         if words[0] == "PUB":
+            
             print("Received request to register a %s publishing %s values from the zipcode %s"%(words[0],words[1],words[-1]))
             if words[2] in publishers.keys():
                 publishers[words[2]].append(words[1])

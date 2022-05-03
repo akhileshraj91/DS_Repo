@@ -24,7 +24,6 @@ from kademlia_dht import Kademlia_DHT
 logging.basicConfig ()
 
 
-
 class ZK_ClientApp ():
     def __init__ (self, args):
         self.IP = get_default_addr()
@@ -41,6 +40,9 @@ class ZK_ClientApp ():
         self.zk = None  
         self.flag = False 
         self.previous = None
+        self.previous_pub = None
+        self.zip_dict = {}
+
 
     def init_client (self):
 
@@ -93,13 +95,32 @@ class ZK_ClientApp ():
                     else:
                         # print("This is printing", self.name)
                         self.zk.create (self.ppath + str ("/") + self.name, value=self.IP.encode(),ephemeral=True)
+                        # print("node created at main")
+                        if "pub" in self.name:
+                            # print(self.zipcode)
+                            index = random.randint(1,100)
+                            self.zk.create (self.ppath + str ("/") + "publishers" + str("/") + self.name, value=str(self.zipcode).encode(),ephemeral=True)
+
+                            # print(index)
+                            # if self.zk.exists(self.ppath + str ("/") + "publishers" + str("/")+ self.zipcode):
+                            #     # print("path exists")
+                            #     self.zk.create (self.ppath + str ("/") + "publishers" + str("/") + self.zipcode + str("/")+ self.name, value=str(index).encode(),ephemeral=True)
+                            #     print("node created")
+
+                            # else:
+                            #     # print("path does not exists")
+                            #     self.zk.create (self.ppath + str ("/") + "publishers" + str("/") + self.zipcode, value=str(index).encode())
+                            #     self.zk.create (self.ppath + str ("/") + "publishers" + str("/") + self.zipcode+ str("/") + self.name, value=str(index).encode(),ephemeral=True)
+                            #     print("zip and node created")
+
+
                         if "register" in self.name:
                             self.zk.set (self.registerpath+"/"+ self.name,value=self.IP.encode())
                         if "broker" in self.name:
                             self.zk.set (self.brokerpath+"/"+self.name,value=self.IP.encode())
                             self.zk.create (self.brokersubpath+"/"+self.name,value=self.IP.encode())
 
-
+ 
 
                         if "sub" in self.name:
                             cur_broker = self.zk.get_children(self.bleaderpath+"/"+"broker")
@@ -113,6 +134,8 @@ class ZK_ClientApp ():
                             new_sc = str(int(sc)+1)
                             # print("""""""""""""""""""""""""""""""""""",new_sc)
                             self.zk.set (self.ppath+"/"+"subscribers",value=new_sc.encode())
+
+
                     break
 
 
@@ -130,6 +153,9 @@ class ZK_ClientApp ():
                     self.zk.create (self.ppath+"/"+"subsubscribers",value=b'0')
                     self.zk.create (self.ppath+"/"+"active_brokers",value=b'0')
                     self.zk.create (self.ppath+"/"+"BS_data",value=b'0')
+                    self.zk.create (self.ppath+"/"+"publishers",value=b'0')
+                    self.zk.create (self.ppath+"/"+"leader_pub",value=b'0')
+
 
                     # time.sleep(1)
 
@@ -211,7 +237,7 @@ class ZK_ClientApp ():
 
                 @self.zk.ChildrenWatch (self.ppath+"/"+"subscribers") 
                 def child_change_watcher (children):
-                    print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
+                    # print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
                     # print("Triggered the watcher")
                     self.current = children
                     print(self.current,self.previous)
@@ -228,27 +254,67 @@ class ZK_ClientApp ():
                                     self.zk.create (self.brokerpath+"/"+term,value=ip_add_bd)
                                     self.zk.delete (self.ppath+"/"+"subsubscribers"+"/"+ele,recursive=True)
 
-
-
                     self.previous = self.current
-                    # print(children,"__________________",event)
-                #     self.zk.getACL(self.ppath+"/"+"subscribers")
-                # @client.DataWatch(self.ppath+"/"+"subscribers")
-                # def data_change_watcher(data, stat, event):
-                #     print("Data is %s" % data)
-                #     print("Version is %s" % stat.version)
-                #     print("Event is %s" % event)
 
-                    # if self.zk.exists (self.ppath+"/"+"BS_data"):
-                    #     print("path exists")  
 
-                    # else:
-                    #     try:
-                    #         self.zk.create (self.bleaderpath+"/"+"broker",value=self.IP.encode(),ephemeral=True)
-                    #         print("Leader reinitialized..............................................")
-                    #     except:
-                    #         # print("Unexpected error in ClientApp::run", sys.exc_info()[0])
-                    #         pass
+
+                @self.zk.ChildrenWatch (self.ppath+"/"+"publishers") 
+                def child_change_watcher (children):
+                    # print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
+                    print("Triggered the watcher",children)
+                    self.current_pub = children
+                    print(self.current_pub,self.previous_pub)
+                    if (self.previous_pub != None):
+                        for ele in self.current_pub:
+                            if (ele not in self.previous_pub):
+                                print(ele, " was created")
+                                new_child_zip,_ = self.zk.get(self.ppath+"/"+"publishers"+"/"+ele)
+                                print("zip of new child is",new_child_zip.decode())
+                                new_child_zip = new_child_zip.decode()
+                                if new_child_zip in self.zip_dict.keys():
+                                    self.zip_dict[new_child_zip].append(ele)
+                                else:
+                                    self.zip_dict[new_child_zip] = []
+                                    self.zip_dict[new_child_zip].append(ele)
+                                    self.zk.create(self.ppath+"/"+"leader_pub"+"/" + str(new_child_zip),value = ele.encode())
+                                    break
+
+                    else:
+                        if children != []:
+                            ele = children[0]
+                            new_child_zip,_ = self.zk.get(self.ppath+"/"+"publishers"+"/"+ele)
+                            self.zk.create(self.ppath+"/"+"leader_pub"+"/" + str(new_child_zip),value = ele.encode())
+                            
+
+
+                    if (self.previous_pub != None):
+                        for ele in self.previous_pub:
+                            if (ele not in self.current_pub):
+                                print(ele, " was deleted")
+                                for zipcodes in self.zip_dict.keys():
+                                    if ele in self.zip_dict[zipcodes]:
+                                        print("The zipcode of the element ", ele," is ", zipcodes)
+                                        self.zip_dict[zipcodes].remove(ele)
+                                        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",self.zip_dict)
+                                        new_pub = random.choice(self.zip_dict[zipcodes])
+                                        print("The new publisher for the zipcode ", zipcodes, " is ", new_pub)
+                                        self.zk.create(self.ppath+"/"+"leader_pub"+"/" + str(zipcodes),value = new_pub.encode())
+                                        break
+                                break
+               
+
+
+                    self.previous_pub = self.current_pub
+                    print(self.zip_dict)
+
+
+
+
+
+
+
+
+
 
 
     

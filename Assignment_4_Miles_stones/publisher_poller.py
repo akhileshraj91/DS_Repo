@@ -22,13 +22,30 @@ def zk_main ():
     
     client.run_client ()
     value = None
+    flag =0
 
-    while value == None:
-        value, stat = client.zk.get ("/MAIN/leaders/register")
+    while value == None:   
+        time.sleep(1)
+        zipcodes = client.zk.get_children ("/MAIN/leader_pub")
+        # print(zipcodes)
+        if zipcodes != []:
+            zipcodes = zipcodes[0]
+            # print(zipcodes,args.zipcode)
+            name,_ = client.zk.get ("/MAIN/leader_pub/"+zipcodes)
+            # print(name,args.name)
 
-        print(value.decode())
+            name = name.decode()
+            # print(name,args.name)
+            if name == args.name and zipcodes == args.zipcode:
 
-    return value.decode()
+                value, stat = client.zk.get ("/MAIN/leaders/register")
+
+                print(value.decode())
+                client.zk.delete ("/MAIN/leader_pub/"+zipcodes,recursive=True)
+
+                return value.decode()
+            else:
+                continue
 
 
 srv_addr = zk_main()
