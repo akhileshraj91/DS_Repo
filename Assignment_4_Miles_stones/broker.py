@@ -20,14 +20,15 @@ client.run_client ()
 
 def zk_main (val):
     value = None
-    # while value == None:
-    # print("/MAIN/leaders/%s"%val)
+
     if client.zk.exists ("/MAIN/leaders/%s"%val):
-        # print("/MAIN/leaders/%s"%val+"exists")
         value, stat = client.zk.get ("/MAIN/leaders/%s"%val)
-        value = value.decode()
-        # print(value.decode())
-    return value 
+        children = client.zk.get_children("/MAIN/leaders/%s"%val)
+        if val == "register":
+            return value.decode()
+        else:
+            # print(children)
+            return children
 
 
 def main():
@@ -42,6 +43,7 @@ def main():
     zip_code = "37209"
     socket_register = context.socket(zmq.REQ)
     # srv_addr = "10.0.0.1"
+    # print(srv_addr)
     connect_str = "tcp://" + srv_addr + ":5555"
     socket_register.connect (connect_str)
     kind = "BROKER"
@@ -52,9 +54,15 @@ def main():
     while True:
         time.sleep(1)
         bro = zk_main("broker")
-        # print("________________________________________",bro,IP)
+        # print(bro[0])
+        if client.zk.get_children (client.ppath+"/"+"leaders"+"/"+ "broker") != []:
+            bro_IP,_ = client.zk.get ("/MAIN/leaders/broker/%s"%bro[0])
+        else:
+            continue
+        # print(bro_IP)
 
-        if bro == IP:
+
+        if bro_IP.decode() == IP:
             string_send = str(kind + " " + IP + ":" + PORT)
 
             socket_register.send(string_send.encode())
