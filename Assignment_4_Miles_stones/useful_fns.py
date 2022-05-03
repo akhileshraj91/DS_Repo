@@ -21,7 +21,6 @@ import logging
 
 from kademlia_dht import Kademlia_DHT
 
-import logging
 logging.basicConfig ()
 
 
@@ -36,10 +35,12 @@ class ZK_ClientApp ():
         self.ppath = "/MAIN"
         self.registerpath = "/MAIN/register"
         self.brokerpath = "/MAIN/broker" 
+        self.brokersubpath = "/MAIN/broker_sub" 
         self.bleaderpath = "/MAIN/leaders"
         self.PUBS = args.users
         self.zk = None  
         self.flag = False 
+        self.previous = None
 
     def init_client (self):
 
@@ -68,6 +69,8 @@ class ZK_ClientApp ():
                     elif "broker" in self.name:
                         # print("THIS IS A BROKER")
                         self.zk.create (self.brokerpath+"/"+self.name,value=self.IP.encode(),ephemeral=True)
+                        self.zk.create (self.brokersubpath+"/"+self.name,value=self.IP.encode())
+
                         self.zk.create (self.ppath+"/"+"active_brokers"+"/"+self.name,value=self.IP.encode(),ephemeral=True)
                         if self.zk.get_children (self.ppath+"/"+"leaders"+"/"+ "broker") != []:
                             # print("NODE EXISTS")
@@ -94,12 +97,17 @@ class ZK_ClientApp ():
                             self.zk.set (self.registerpath+"/"+ self.name,value=self.IP.encode())
                         if "broker" in self.name:
                             self.zk.set (self.brokerpath+"/"+self.name,value=self.IP.encode())
+                            self.zk.create (self.brokersubpath+"/"+self.name,value=self.IP.encode())
+
+
 
                         if "sub" in self.name:
                             cur_broker = self.zk.get_children(self.bleaderpath+"/"+"broker")
                             print(cur_broker)
                             broker_name = cur_broker[0]
                             self.zk.create (self.ppath+"/"+"subscribers"+"/"+self.name,value=broker_name.encode(),ephemeral=True)
+                            self.zk.create (self.ppath+"/"+"subsubscribers"+"/"+self.name,value=broker_name.encode())
+
                             sub_count,_ = self.zk.get(self.ppath+"/"+"subscribers")
                             sc = sub_count.decode() 
                             new_sc = str(int(sc)+1)
@@ -113,11 +121,13 @@ class ZK_ClientApp ():
                     self.zk.start ()
                     self.zk.create (self.ppath,value=b'0')
                     self.zk.create (self.brokerpath,value=b'0')
+                    self.zk.create (self.brokersubpath,value=b'0')
                     self.zk.create (self.registerpath,value=b'0')
                     self.zk.create (self.bleaderpath,value=b'0')
                     self.zk.create (self.bleaderpath+"/"+"broker",value=b'0')
                     self.zk.create (self.bleaderpath+"/"+ "register",ephemeral=True)
                     self.zk.create (self.ppath+"/"+"subscribers",value=b'0')
+                    self.zk.create (self.ppath+"/"+"subsubscribers",value=b'0')
                     self.zk.create (self.ppath+"/"+"active_brokers",value=b'0')
                     self.zk.create (self.ppath+"/"+"BS_data",value=b'0')
 
@@ -166,7 +176,7 @@ class ZK_ClientApp ():
                 @self.zk.DataWatch (self.ppath+"/"+"subscribers")
                 def data_change_watcher (data, stat):
                     """Data Change Watcher"""
-                    print(("ClientApp::DataChangeWatcher {} - data = {}, stat = {}".format (self.name, data, stat)))
+                    # print(("ClientApp::DataChangeWatcher {} - data = {}, stat = {}".format (self.name, data, stat)))
                     value = int (data)
                     print(value)
 
@@ -174,30 +184,25 @@ class ZK_ClientApp ():
                         while True:
                             available_brokers = self.zk.get_children(self.brokerpath)
                             new_leader = random.choice(available_brokers)
-                            print("________________________",new_leader)
-
                             new_ip,_ = self.zk.get(self.brokerpath+"/"+new_leader)
-                            print(new_ip)
                             self.zk.delete (self.brokerpath+"/"+new_leader,recursive=True)
-
-                            # print("_______________________",new_ip.decode())
                             new_val = new_ip.decode()
-                            old_val= self.zk.get_children(self.bleaderpath+"/"+"broker")
+                            old_val = self.zk.get_children(self.bleaderpath+"/"+"broker")
                             value = str(value)
-                            self.zk.create (self.ppath+"/"+"BS_data"+"/"+old_val[0],value=value.encode())
                             # old_val = old_val.decode()
                             print("___",old_val[0])
                             if new_leader != old_val[0]:
+                                self.zk.create (self.ppath+"/"+"BS_data"+"/"+old_val[0],value=value.encode())
                                 self.zk.delete (self.bleaderpath+"/"+"broker",recursive=True)
                                 self.zk.create (self.bleaderpath+"/"+"broker",value=b'0')
                                 self.zk.create (self.bleaderpath+"/"+"broker"+"/"+new_leader,value=new_val.encode(),ephemeral=True)
                                 if self.zk.exists (self.ppath+"/"+"BS_data"+"/"+new_leader):
-                                    self.zk.set (self.ppath+"/"+"subscribers",value=b'0')
-
-                                else:
                                     n_val,_ = self.zk.get(self.ppath+"/"+"BS_data"+"/"+new_leader)
                                     print("NEW BROKER DETAILS UPDATED")
                                     self.zk.set (self.ppath+"/"+"subscribers",value=n_val)
+                                else:
+                                    self.zk.set (self.ppath+"/"+"subscribers",value=b'0')
+
                                 break
                             else:
                                 continue
@@ -207,9 +212,32 @@ class ZK_ClientApp ():
                 @self.zk.ChildrenWatch (self.ppath+"/"+"subscribers") 
                 def child_change_watcher (children):
                     print(("Driver::run -- children watcher: num childs = {}".format (len (children))))
-                    print("Triggered the watcher")
-                    print(children)
-                    self.zk.getACL(self.ppath+"/"+"subscribers")
+                    # print("Triggered the watcher")
+                    self.current = children
+                    print(self.current,self.previous)
+                    if self.previous != None:
+                        for ele in self.previous:
+                            if (ele not in self.current):
+                                print(ele, " was deleted")
+                                bd,_ = self.zk.get(self.ppath+"/"+"subsubscribers"+"/"+ele)
+                                term = bd.decode()
+                                ip_add_bd,_ = self.zk.get(self.brokersubpath+"/"+term)
+                                if self.zk.exists(self.brokerpath+"/"+term):
+                                    pass 
+                                else:
+                                    self.zk.create (self.brokerpath+"/"+term,value=ip_add_bd)
+                                    self.zk.delete (self.ppath+"/"+"subsubscribers"+"/"+ele,recursive=True)
+
+
+
+                    self.previous = self.current
+                    # print(children,"__________________",event)
+                #     self.zk.getACL(self.ppath+"/"+"subscribers")
+                # @client.DataWatch(self.ppath+"/"+"subscribers")
+                # def data_change_watcher(data, stat, event):
+                #     print("Data is %s" % data)
+                #     print("Version is %s" % stat.version)
+                #     print("Event is %s" % event)
 
                     # if self.zk.exists (self.ppath+"/"+"BS_data"):
                     #     print("path exists")  
