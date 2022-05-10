@@ -7,7 +7,7 @@ import useful_fns
 import json
 import random
 import keyboard
-
+from collections import deque
 args = useful_fns.parseCmdLineArgs()
 
 def zk_main ():
@@ -85,6 +85,8 @@ socket.bind (bind_str)
 params = args.info.split(",")
 print(params)
 start_time = time.time()
+data_history = deque([])
+flag = 0
 while True:
     para = random.choice(params)
     if para == "temp":  # temp
@@ -99,7 +101,12 @@ while True:
     else:
         print ("bad category")
         continue
-
+    if len(data_history) <= 5:    
+        data_history.append(topic)
+    else:
+        data_history.popleft()
+        data_history.append(topic)
+    # print(data_history)
     print ("Sending: {}".format (topic))
     socket.send_string (topic)
     time.sleep (1)  
